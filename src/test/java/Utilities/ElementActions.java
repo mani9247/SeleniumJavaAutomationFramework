@@ -1,6 +1,7 @@
 package Utilities;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -33,8 +34,20 @@ public class ElementActions {
 
         public void click(By locator){
 
-            wait.waitForClickable(locator).click();
-            logger.info("Clicked on {}", locator);
+            int attempts = 0;
+
+            while (attempts < 3) {
+                try {
+                    wait.waitForClickable(locator).click();
+                    logger.info("Clicked on {}", locator);
+                    return;
+                } catch (StaleElementReferenceException e) {
+                    attempts++;
+                    logger.warn("Stale element detected. Retry {}", attempts);
+                }
+            }
+
+            throw new RuntimeException("Unable to click: " + locator);
         }
 
         public String getText(By locator){

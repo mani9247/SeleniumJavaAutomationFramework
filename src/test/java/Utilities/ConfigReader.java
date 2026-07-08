@@ -9,11 +9,14 @@ public class ConfigReader {
     Properties prop;
 
     public ConfigReader() {
-
         try {
 
-            FileInputStream fis =
-                    new FileInputStream("src/test/resources/config.properties");
+        String env = System.getProperty("env");
+        if (env == null) {
+            env = "qa";
+        }
+        FileInputStream fis =
+                    new FileInputStream("src/test/resources/"+ env+ ".properties");
 
             prop = new Properties();
 

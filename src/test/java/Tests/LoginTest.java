@@ -1,6 +1,7 @@
 package Tests;
 
 import Base.BaseTest;
+import Base.DriverFactory;
 import Pages.LoginPage;
 
 import Utilities.ConfigReader;
@@ -19,7 +20,7 @@ public class LoginTest extends BaseTest {
     private static final Logger logger =
             LogManager.getLogger(LoginTest.class);
 
-    @DataProvider(name = "loginData", parallel = true)
+    @DataProvider(name = "loginData")
     public Object[][] getData() throws IOException {
         ConfigReader config = new ConfigReader();
 
@@ -32,7 +33,7 @@ public class LoginTest extends BaseTest {
     public  void verifyLogin(String username,
                              String password,String expectedResult){
         LoginPage login =
-                new LoginPage(driver);
+                new LoginPage(DriverFactory.getDriver());
 
         login.enterUsername(username);
 

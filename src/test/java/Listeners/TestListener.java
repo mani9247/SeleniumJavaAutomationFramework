@@ -22,7 +22,8 @@ public class TestListener implements ITestListener {
 
     ExtentReports extent = ExtentManager.getReports();
 
-    ExtentTest test;
+    private static ThreadLocal<ExtentTest> test =
+            new ThreadLocal<>();;
 
     @Override
     public void onTestStart(ITestResult result){
@@ -35,29 +36,32 @@ public class TestListener implements ITestListener {
             testName = testName + " [" + data[0] + ", " + data[1] + "]";
         }
 
-        test = extent.createTest(testName);
+        test.set(extent.createTest(testName));
 
         logger.info("Test Started : " + result.getName());
+        test.remove();
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        test.pass("Test Passed");
+        test.get().pass("Test Passed");
         logger.info("Test Passed : " + result.getName());
+        test.remove();
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
 
-        test.fail(result.getThrowable());
+        test.get().fail(result.getThrowable());
         logger.error("Test Failed : " + result.getName());
+        test.remove();
         try {
 
             String path = ScreenshotUtils.captureScreenshot(
                     DriverFactory.getDriver(),
                     result.getName());
 
-            test.addScreenCaptureFromPath(path);
+            test.get().addScreenCaptureFromPath(path);
 
         } catch (Exception e) {
 
@@ -67,7 +71,8 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        test.skip("Test Skipped");
+        test.get().skip("Test Skipped");
+        test.remove();
         System.out.println(
                 "Skipped : "
                         + result.getName());
