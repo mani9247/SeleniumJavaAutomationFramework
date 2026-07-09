@@ -66,4 +66,12 @@ public class ConfigReader {
     public int getPageLoadTimeout() {
         return Integer.parseInt(prop.getProperty("pageLoadTimeout"));
     }
+
+    public String getExecution() {
+        return prop.getProperty("execution");
+    }
+
+    public String getGridUrl() {
+        return prop.getProperty("gridUrl");
+    }
 }
