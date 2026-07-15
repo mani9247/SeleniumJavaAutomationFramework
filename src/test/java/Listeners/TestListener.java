@@ -39,7 +39,6 @@ public class TestListener implements ITestListener {
         test.set(extent.createTest(testName));
 
         logger.info("Test Started : " + result.getName());
-        test.remove();
     }
 
     @Override
@@ -54,7 +53,7 @@ public class TestListener implements ITestListener {
 
         test.get().fail(result.getThrowable());
         logger.error("Test Failed : " + result.getName());
-        test.remove();
+
         try {
 
             String path = ScreenshotUtils.captureScreenshot(
@@ -67,6 +66,7 @@ public class TestListener implements ITestListener {
 
             e.printStackTrace();
         }
+        test.remove();
     }
 
     @Override
