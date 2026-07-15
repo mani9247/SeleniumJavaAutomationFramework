@@ -9,6 +9,11 @@ pipeline {
             choices: ['chrome', 'firefox', 'edge'],
             description: 'Select Browser'
         )
+         choice(
+                name: 'ENV',
+                choices: ['qa', 'uat', 'prod'],
+                description: 'Select Environment'
+            )
 
     }
 
@@ -28,7 +33,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat "mvn test -Dbrowser=${params.BROWSER}"
+                bat "mvn test -Dbrowser=${params.BROWSER} -Denv=${params.ENV}"
             }
         }
     }
