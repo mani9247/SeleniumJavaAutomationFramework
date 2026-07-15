@@ -23,7 +23,11 @@ public class DriverFactory {
     public static void initDriver() {
 
         ConfigReader config = new ConfigReader();
-        String browser = config.getBrowser();
+        String browser = System.getProperty("browser");
+
+        if (browser == null || browser.isBlank()) {
+            browser = config.getBrowser();
+        }
         try
         {
             switch (browser.toLowerCase()) {

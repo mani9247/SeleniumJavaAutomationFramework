@@ -48,7 +48,13 @@ public class ConfigReader {
         return prop.getProperty("password");
     }
     public String getExcelPath() {
-        return prop.getProperty("excelPath");
+        String path = prop.getProperty("excelPath");
+
+        if (path == null) {
+            throw new RuntimeException("excelPath is missing in qa.properties");
+        }
+
+        return path;
     }
     public int getImplicitWait() {
         String value = prop.getProperty("implicitWait");
@@ -60,7 +66,13 @@ public class ConfigReader {
     }
 
     public int getExplicitWait() {
-        return Integer.parseInt(prop.getProperty("explicitWait"));
+
+        String value = prop.getProperty("explicitWait");
+
+        if (value == null) {
+            throw new RuntimeException("explicitWait is missing in qa.properties");
+        }
+        return Integer.parseInt(value);
     }
 
     public int getPageLoadTimeout() {
