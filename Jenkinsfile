@@ -36,6 +36,19 @@ pipeline {
                 bat "mvn test -Dbrowser=${params.BROWSER} -Denv=${params.ENV}"
             }
         }
+
+        stage('Publish Report') {
+            steps {
+                publishHTML(target: [
+                    reportDir: 'Reports',
+                    reportFiles: 'AutomationReport.html',
+                    reportName: 'Extent Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
+            }
+        }
     }
 
     post {
