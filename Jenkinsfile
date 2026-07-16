@@ -54,6 +54,10 @@ pipeline {
     post {
 
         always {
+
+            archiveArtifacts artifacts: 'Reports/**/*',
+                    fingerprint: true
+
             junit 'target/surefire-reports/*.xml'
         }
 
@@ -65,4 +69,5 @@ pipeline {
             echo 'Build Failed'
         }
     }
+
 }
