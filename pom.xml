@@ -12,7 +12,9 @@
         <maven.compiler.source>22</maven.compiler.source>
         <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <suiteXmlFile>src/test/resources/smoke.xml</suiteXmlFile>
     </properties>
+
 
     <dependencies>
 
@@ -65,5 +67,27 @@
             <version>2.15.0</version>
         </dependency>
     </dependencies>
+    <build>
 
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+
+                <configuration>
+                    <systemPropertyVariables>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                    </systemPropertyVariables>
+
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+    </build>
 </project>

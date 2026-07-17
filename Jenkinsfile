@@ -14,6 +14,11 @@ pipeline {
                 choices: ['qa', 'uat', 'prod'],
                 description: 'Select Environment'
             )
+        choice(
+                name: 'SUITE',
+                choices: ['smoke','regression'],
+                description: 'Select Test Suite'
+        )
 
     }
 
@@ -33,7 +38,12 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat "mvn test -Dbrowser=${params.BROWSER} -Denv=${params.ENV}"
+                bat """
+                         mvn test ^
+                        -Dbrowser=${params.BROWSER} ^
+                        -Denv=${params.ENV} ^
+                        -DsuiteXmlFile=src/test/resources/${params.SUITE}.xml
+                 """
             }
         }
 
