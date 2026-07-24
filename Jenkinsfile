@@ -4,11 +4,6 @@ pipeline {
 
     parameters {
 
-        choice(
-            name: 'BROWSER',
-            choices: ['chrome', 'firefox', 'edge'],
-            description: 'Select Browser'
-        )
          choice(
                 name: 'ENV',
                 choices: ['qa', 'uat', 'prod'],
@@ -37,14 +32,39 @@ pipeline {
         }
 
         stage('Run Tests') {
-            steps {
-                bat """
-                         mvn test ^
-                        -Dbrowser=${params.BROWSER} ^
-                        -Denv=${params.ENV} ^
-                        -DsuiteXmlFile=src/test/resources/${params.SUITE}.xml
-                 """
+
+            matrix {
+
+                axes {
+
+                    axis {
+                        name 'BROWSER'
+                        values 'chrome', 'firefox', 'edge'
+                    }
+
+                }
+
+                stages {
+
+                    stage('Execute Tests') {
+
+                        steps {
+
+                            bat """
+                    mvn test ^
+                    -Dbrowser=%BROWSER% ^
+                    -Denv=${params.ENV} ^
+                    -Dsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
+                    """
+
+                        }
+
+                    }
+
+                }
+
             }
+
         }
 
         stage('Publish Report') {
