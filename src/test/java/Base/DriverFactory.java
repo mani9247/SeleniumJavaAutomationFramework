@@ -27,6 +27,9 @@ public class DriverFactory {
         if (browser == null || browser.isBlank()) {
             browser = config.getBrowser();
         }
+        System.out.println("Execution : " + config.getExecution());
+        System.out.println("Grid URL : " + config.getGridUrl());
+        System.out.println("Browser : " + browser);
 
         try {
 
@@ -40,6 +43,7 @@ public class DriverFactory {
                     chromeOptions.addArguments("--disable-dev-shm-usage");
                     chromeOptions.addArguments("--no-sandbox");
                     chromeOptions.addArguments("--remote-allow-origins=*");
+                    chromeOptions.addArguments("--disable-gpu");
 
                     if ("true".equalsIgnoreCase(System.getProperty("headless"))) {
                         chromeOptions.addArguments("--headless=new");
@@ -135,6 +139,8 @@ public class DriverFactory {
 
             System.out.println("-------------------------------------");
             System.out.println("Browser      : " + browser);
+            System.out.println("Execution : " + config.getExecution());
+            System.out.println("Grid URL  : " + config.getGridUrl());
             System.out.println("Execution    : " + config.getExecution());
             System.out.println("Thread ID    : " + Thread.currentThread().getId());
             System.out.println("-------------------------------------");
