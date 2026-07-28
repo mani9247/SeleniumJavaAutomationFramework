@@ -20,7 +20,7 @@ public class LoginTest extends BaseTest {
     private static final Logger logger =
             LogManager.getLogger(LoginTest.class);
 
-    @DataProvider(name = "loginData", parallel = true)
+    @DataProvider(name = "loginData", parallel = false)
     public Object[][] getData() throws IOException {
         ConfigReader config = new ConfigReader();
 

@@ -5,7 +5,7 @@
 
 <suite name="Automation Suite"
        parallel="methods"
-       thread-count="3">
+       thread-count="1">
 
     <listeners>
 
