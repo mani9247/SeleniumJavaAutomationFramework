@@ -39,7 +39,7 @@ pipeline {
 
                     axis {
                         name 'BROWSER'
-                        values 'edge'
+                        values 'chrome', 'firefox'
                     }
 
                 }
@@ -51,11 +51,14 @@ pipeline {
                         steps {
 
                             bat """
-                    mvn test ^
-                    -Dbrowser=%BROWSER% ^
-                    -Denv=${params.ENV} ^
-                    -Dsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
-                    """
+                            echo Browser=%BROWSER%
+                                    echo Environment=${params.ENV}
+
+                            mvn clean test ^
+                            -Dbrowser=%BROWSER% ^
+                                    -Denv=${params.ENV} ^
+                                    -DDsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
+                            """
 
                         }
 
