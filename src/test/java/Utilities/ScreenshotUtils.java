@@ -48,7 +48,7 @@ public class ScreenshotUtils {
             } catch (IOException e) {
                 throw new RuntimeException("Unable to capture screenshot", e);
             }
-            return "../Screenshots/" + testName + ".png";
+            return  dest.getAbsolutePath();
         }
     }
 

@@ -57,12 +57,12 @@ public class TestListener implements ITestListener {
 
         try {
 
-            String path = ScreenshotUtils.captureScreenshot(
+            String absolutePath = ScreenshotUtils.captureScreenshot(
                     DriverFactory.getDriver(),
                     result.getName());
 
-            test.get().addScreenCaptureFromPath(path);
-            AllureUtils.attachScreenshot(path);
+            test.get().addScreenCaptureFromPath( "../Screenshots/" + result.getName() + ".png");
+            AllureUtils.attachScreenshot(absolutePath);
 
         } catch (Exception e) {
 
