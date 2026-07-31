@@ -7,6 +7,7 @@ import Utilities.ScreenshotUtils;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+import Utilities.AllureUtils;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
@@ -61,6 +62,8 @@ public class TestListener implements ITestListener {
                     result.getName());
 
             test.get().addScreenCaptureFromPath(path);
+            AllureUtils.attachScreenshot(
+                    DriverFactory.getDriver());
 
         } catch (Exception e) {
 
@@ -84,6 +87,6 @@ public class TestListener implements ITestListener {
         extent.flush();
 
         System.out.println("Execution Completed");
-        System.out.println("Thank you");
+
     }
 }

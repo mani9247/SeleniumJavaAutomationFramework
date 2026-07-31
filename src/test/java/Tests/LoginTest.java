@@ -42,10 +42,12 @@ public class LoginTest extends BaseTest {
 
         if(expectedResult.equalsIgnoreCase("Pass")) {
 
-            Assert.assertTrue(
+            Assert.assertTrue(false, "Intentional Failure");
+
+          /*  Assert.assertTrue(
                     login.isDashboardDisplayed(),
                     "Dashboard is not displayed after successful login."
-            );
+            );*/
 
         } else {
 
