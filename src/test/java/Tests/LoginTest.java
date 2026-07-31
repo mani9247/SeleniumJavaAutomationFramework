@@ -55,6 +55,7 @@ public class LoginTest extends BaseTest {
             );
 
         }
+
         System.out.println("--------------------------------");
         logger.info("Username : {}", username);
         logger.info("Password : {}", password);

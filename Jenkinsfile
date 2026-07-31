@@ -24,13 +24,6 @@ pipeline {
                 checkout scm
             }
         }
-
-        stage('Build') {
-            steps {
-                bat 'mvn clean compile'
-            }
-        }
-
         stage('Run Tests') {
 
             matrix {
@@ -57,7 +50,7 @@ pipeline {
                             mvn clean test ^
                             -Dbrowser=%BROWSER% ^
                                     -Denv=${params.ENV} ^
-                                    -DDsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
+                                    -Dsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
                             """
 
                         }
@@ -69,29 +62,31 @@ pipeline {
             }
 
         }
-
-        stage('Publish Report') {
-            steps {
-                publishHTML(target: [
-                    reportDir: 'Reports',
-                    reportFiles: 'AutomationReport.html',
-                    reportName: 'Extent Report',
-                    keepAll: true,
-                    alwaysLinkToLastBuild: true,
-                    allowMissing: false
-                ])
-            }
-        }
     }
 
     post {
 
         always {
 
+            publishHTML(target: [
+                    reportDir: 'Reports',
+                    reportFiles: 'AutomationReport.html',
+                    reportName: 'Extent Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+            ])
+
             archiveArtifacts artifacts: 'Reports/**/*',
                     fingerprint: true
 
             junit 'target/surefire-reports/*.xml'
+
+            allure([
+                    includeProperties: false,
+                    jdk: '',
+                    results: [[path: 'allure-results']]
+            ])
         }
 
         success {

@@ -2,6 +2,12 @@
 
 <suite name="Smoke Suite">
 
+    <listeners>
+        <listener class-name="Listeners.TestListener"/>
+
+        <listener class-name="Listeners.RetryTransformer"/>
+    </listeners>
+
     <test name="Smoke Tests">
 
         <classes>
