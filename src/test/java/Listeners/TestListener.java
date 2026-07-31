@@ -62,8 +62,7 @@ public class TestListener implements ITestListener {
                     result.getName());
 
             test.get().addScreenCaptureFromPath(path);
-            AllureUtils.attachScreenshot(
-                    DriverFactory.getDriver());
+            AllureUtils.attachScreenshot(path);
 
         } catch (Exception e) {
 

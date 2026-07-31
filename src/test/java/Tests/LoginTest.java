@@ -41,14 +41,9 @@ public class LoginTest extends BaseTest {
         login.clickLogin();
 
         if(expectedResult.equalsIgnoreCase("Pass")) {
+            Assert.assertTrue(login.isDashboardDisplayed());
 
-            Assert.assertTrue(false, "Intentional Failure");
-
-          /*  Assert.assertTrue(
-                    login.isDashboardDisplayed(),
-                    "Dashboard is not displayed after successful login."
-            );*/
-
+            Assert.fail("Intentional Failure");
         } else {
 
             Assert.assertTrue(

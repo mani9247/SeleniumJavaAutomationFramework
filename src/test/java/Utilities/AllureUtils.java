@@ -1,21 +1,23 @@
 package Utilities;
-import io.qameta.allure.Allure;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
 
-import java.io.ByteArrayInputStream;
+import io.qameta.allure.Allure;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class AllureUtils {
-    public static void attachScreenshot(WebDriver driver) {
 
-        byte[] screenshot =
-                ((TakesScreenshot) driver)
-                        .getScreenshotAs(OutputType.BYTES);
+    public static void attachScreenshot(String filePath) {
 
-        Allure.addAttachment(
-                "Failure Screenshot",
-                new ByteArrayInputStream(screenshot));
+        try (InputStream is = new FileInputStream(filePath)) {
 
+            Allure.addAttachment("Failure Screenshot",
+                    "image/png",
+                    is,
+                    ".png");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
