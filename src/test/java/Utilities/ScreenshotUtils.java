@@ -1,6 +1,7 @@
 package Utilities;
 
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -8,47 +9,40 @@ import org.openqa.selenium.WebDriver;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ScreenshotUtils {
+
     private static final Logger logger =
             LogManager.getLogger(ScreenshotUtils.class);
 
-        public static String captureScreenshot(
-                WebDriver driver,
-                String testName) {
+    public static String captureScreenshot(WebDriver driver, String testName) {
 
-            TakesScreenshot ts =
-                    (TakesScreenshot) driver;
+        byte[] screenshot =
+                ((TakesScreenshot) driver)
+                        .getScreenshotAs(OutputType.BYTES);
 
-            File src =
-                    ts.getScreenshotAs(
-                            OutputType.FILE);
+        File dest = new File(
+                System.getProperty("user.dir")
+                        + File.separator
+                        + "Screenshots"
+                        + File.separator
+                        + testName
+                        + ".png");
 
-            String path =
-                    "./Screenshots/"
-                            + testName
-                            + ".png";
+        dest.getParentFile().mkdirs();
 
-            File dest =
-                    new File(path);
+        try {
 
-            try {
+            Files.write(dest.toPath(), screenshot);
 
-                Files.copy(src.toPath(),
-                        dest.toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
+            logger.info("Screenshot saved successfully: {}", dest.getAbsolutePath());
 
-                logger.info("Screenshot saved successfully");
+        } catch (IOException e) {
 
+            throw new RuntimeException("Unable to save screenshot", e);
 
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to capture screenshot", e);
-            }
-            return  dest.getAbsolutePath();
         }
-    }
 
+        return dest.getAbsolutePath();
+    }
+}
