@@ -17,32 +17,60 @@ public class ScreenshotUtils {
 
     public static String captureScreenshot(WebDriver driver, String testName) {
 
-        byte[] screenshot =
-                ((TakesScreenshot) driver)
-                        .getScreenshotAs(OutputType.BYTES);
-
-        File dest = new File(
-                System.getProperty("user.dir")
-                        + File.separator
-                        + "Screenshots"
-                        + File.separator
-                        + testName
-                        + ".png");
-
-        dest.getParentFile().mkdirs();
+        if (driver == null) {
+            throw new RuntimeException("WebDriver is NULL.");
+        }
 
         try {
 
+            System.out.println("======================================");
+            System.out.println("Taking Screenshot...");
+            System.out.println("Driver : " + driver);
+            System.out.println("Driver Class : " + driver.getClass());
+            System.out.println("Current URL : " + driver.getCurrentUrl());
+
+            // Capture screenshot as bytes (better for Grid & RemoteWebDriver)
+            byte[] screenshot =
+                    ((TakesScreenshot) driver)
+                            .getScreenshotAs(OutputType.BYTES);
+
+            // Create Screenshots folder if it doesn't exist
+            File folder = new File(System.getProperty("user.dir")
+                    + File.separator + "Screenshots");
+
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            // Destination file
+            File dest = new File(folder,
+                    testName + ".png");
+
+            // Save screenshot
             Files.write(dest.toPath(), screenshot);
 
-            logger.info("Screenshot saved successfully: {}", dest.getAbsolutePath());
+            System.out.println("Screenshot Saved : "
+                    + dest.getAbsolutePath());
+
+            logger.info("Screenshot saved successfully : {}",
+                    dest.getAbsolutePath());
+
+            System.out.println("======================================");
+
+            return dest.getAbsolutePath();
 
         } catch (IOException e) {
 
+            logger.error("Failed to save screenshot", e);
             throw new RuntimeException("Unable to save screenshot", e);
+
+        } catch (Exception e) {
+
+            logger.error("Failed to capture screenshot", e);
+            throw new RuntimeException("Unable to capture screenshot", e);
 
         }
 
-        return dest.getAbsolutePath();
     }
+
 }
