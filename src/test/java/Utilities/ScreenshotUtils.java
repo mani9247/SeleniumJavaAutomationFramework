@@ -7,8 +7,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.FileOutputStream;
 
 public class ScreenshotUtils {
 
@@ -17,56 +16,39 @@ public class ScreenshotUtils {
 
     public static String captureScreenshot(WebDriver driver, String testName) {
 
-        if (driver == null) {
-            throw new RuntimeException("WebDriver is NULL.");
-        }
-
         try {
 
             System.out.println("======================================");
             System.out.println("Taking Screenshot...");
             System.out.println("Driver : " + driver);
-            System.out.println("Driver Class : " + driver.getClass());
             System.out.println("Current URL : " + driver.getCurrentUrl());
+            System.out.println("Title : " + driver.getTitle());
 
-            // Capture screenshot as bytes (better for Grid & RemoteWebDriver)
             byte[] screenshot =
                     ((TakesScreenshot) driver)
                             .getScreenshotAs(OutputType.BYTES);
 
-            // Create Screenshots folder if it doesn't exist
-            File folder = new File(System.getProperty("user.dir")
-                    + File.separator + "Screenshots");
+            String path =
+                    System.getProperty("user.dir")
+                            + File.separator
+                            + "Screenshots"
+                            + File.separator
+                            + testName
+                            + ".png";
 
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
+            File file = new File(path);
+            file.getParentFile().mkdirs();
 
-            // Destination file
-            File dest = new File(folder,
-                    testName + ".png");
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(screenshot);
+            fos.close();
 
-            // Save screenshot
-            Files.write(dest.toPath(), screenshot);
+            logger.info("Screenshot saved successfully : " + path);
 
-            System.out.println("Screenshot Saved : "
-                    + dest.getAbsolutePath());
-
-            logger.info("Screenshot saved successfully : {}",
-                    dest.getAbsolutePath());
-
-            System.out.println("======================================");
-
-            return dest.getAbsolutePath();
-
-        } catch (IOException e) {
-
-            logger.error("Failed to save screenshot", e);
-            throw new RuntimeException("Unable to save screenshot", e);
+            return path;
 
         } catch (Exception e) {
 
-            logger.error("Failed to capture screenshot", e);
             throw new RuntimeException("Unable to capture screenshot", e);
 
         }
