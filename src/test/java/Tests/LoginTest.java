@@ -40,17 +40,33 @@ public class LoginTest extends BaseTest {
         login.enterPassword(password);
         login.clickLogin();
 
-        if(expectedResult.equalsIgnoreCase("Pass")) {
-            Assert.assertTrue(login.isDashboardDisplayed());
+        if (expectedResult.equalsIgnoreCase("Pass")) {
+
+            Assert.assertTrue(
+                    login.isDashboardDisplayed(),
+                    "Dashboard is not displayed"
+            );
+
+            // TEMPORARY DIAGNOSTIC
+            System.out.println("Dashboard is displayed.");
+            System.out.println("URL before screenshot: "
+                    + DriverFactory.getDriver().getCurrentUrl());
+            System.out.println("Title before screenshot: "
+                    + DriverFactory.getDriver().getTitle());
+
+            Utilities.ScreenshotUtils.captureScreenshot(
+                    DriverFactory.getDriver(),
+                    "DirectScreenshot"
+            );
 
             Assert.fail("Intentional Failure");
+
         } else {
 
             Assert.assertTrue(
                     login.isErrorMessageDisplayed(),
                     "Error message is not displayed for invalid login."
             );
-
         }
 
         System.out.println("--------------------------------");
