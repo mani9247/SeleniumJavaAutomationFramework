@@ -20,7 +20,7 @@ public class LoginTest extends BaseTest {
     private static final Logger logger =
             LogManager.getLogger(LoginTest.class);
 
-    @DataProvider(name = "loginData", parallel = false)
+    @DataProvider(name = "loginData", parallel = true)
     public Object[][] getData() throws IOException {
         ConfigReader config = new ConfigReader();
 
@@ -30,13 +30,14 @@ public class LoginTest extends BaseTest {
 
     }
     @Test(dataProvider = "loginData")
-    public  void verifyLogin(String username,
-                             String password,String expectedResult){
+    public void verifyLogin(String username,
+                            String password,
+                            String expectedResult) {
+
         LoginPage login =
                 new LoginPage(DriverFactory.getDriver());
 
         login.enterUsername(username);
-
         login.enterPassword(password);
         login.clickLogin();
 
@@ -44,22 +45,10 @@ public class LoginTest extends BaseTest {
 
             Assert.assertTrue(
                     login.isDashboardDisplayed(),
-                    "Dashboard is not displayed"
+                    "Dashboard is not displayed after successful login."
             );
 
-            // TEMPORARY DIAGNOSTIC
             System.out.println("Dashboard is displayed.");
-            System.out.println("URL before screenshot: "
-                    + DriverFactory.getDriver().getCurrentUrl());
-            System.out.println("Title before screenshot: "
-                    + DriverFactory.getDriver().getTitle());
-
-            Utilities.ScreenshotUtils.captureScreenshot(
-                    DriverFactory.getDriver(),
-                    "DirectScreenshot"
-            );
-
-            Assert.fail("Intentional Failure");
 
         } else {
 

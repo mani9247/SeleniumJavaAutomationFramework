@@ -6,62 +6,76 @@ import java.util.Properties;
 
 public class ConfigReader {
 
-    Properties prop;
+    private Properties prop;
+    private String env;
 
     public ConfigReader() {
-        try {
 
-        String env = System.getProperty("env");
-        if (env == null) {
+        env = System.getProperty("env");
+
+        if (env == null || env.isBlank()) {
             env = "qa";
         }
-        FileInputStream fis =
-                    new FileInputStream("src/test/resources/"+ env+ ".properties");
+
+        String configPath =
+                "src/test/resources/" + env + ".properties";
+
+        try (FileInputStream fis =
+                     new FileInputStream(configPath)) {
 
             prop = new Properties();
-
             prop.load(fis);
+
+            System.out.println(
+                    "Loaded configuration : " + env + ".properties");
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            throw new RuntimeException(
+                    "Unable to load configuration file: "
+                            + configPath, e);
         }
     }
 
     public String getBrowser() {
-
         return prop.getProperty("browser");
     }
 
     public String getUrl() {
-
         return prop.getProperty("url");
     }
 
     public String getUsername() {
-
         return prop.getProperty("username");
     }
 
     public String getPassword() {
-
         return prop.getProperty("password");
     }
+
     public String getExcelPath() {
+
         String path = prop.getProperty("excelPath");
 
-        if (path == null) {
-            throw new RuntimeException("excelPath is missing in qa.properties");
+        if (path == null || path.isBlank()) {
+            throw new RuntimeException(
+                    "excelPath is missing in "
+                            + env + ".properties");
         }
 
         return path;
     }
+
     public int getImplicitWait() {
+
         String value = prop.getProperty("implicitWait");
 
-        if (value == null) {
-            throw new RuntimeException("implicitWait is missing in config.properties");
+        if (value == null || value.isBlank()) {
+            throw new RuntimeException(
+                    "implicitWait is missing in "
+                            + env + ".properties");
         }
+
         return Integer.parseInt(value);
     }
 
@@ -69,14 +83,26 @@ public class ConfigReader {
 
         String value = prop.getProperty("explicitWait");
 
-        if (value == null) {
-            throw new RuntimeException("explicitWait is missing in qa.properties");
+        if (value == null || value.isBlank()) {
+            throw new RuntimeException(
+                    "explicitWait is missing in "
+                            + env + ".properties");
         }
+
         return Integer.parseInt(value);
     }
 
     public int getPageLoadTimeout() {
-        return Integer.parseInt(prop.getProperty("pageLoadTimeout"));
+
+        String value = prop.getProperty("pageLoadTimeout");
+
+        if (value == null || value.isBlank()) {
+            throw new RuntimeException(
+                    "pageLoadTimeout is missing in "
+                            + env + ".properties");
+        }
+
+        return Integer.parseInt(value);
     }
 
     public String getExecution() {
