@@ -12,17 +12,17 @@ pipeline {
 
     parameters {
 
-         choice(
+        choice(
                 name: 'ENV',
                 choices: ['qa', 'uat', 'prod'],
                 description: 'Select Environment'
-            )
-        choice(
-                name: 'SUITE',
-                choices: ['smoke','regression'],
-                description: 'Select Test Suite'
         )
 
+        choice(
+                name: 'SUITE',
+                choices: ['smoke', 'regression'],
+                description: 'Select Test Suite'
+        )
     }
 
     stages {
@@ -32,6 +32,7 @@ pipeline {
                 checkout scm
             }
         }
+
         stage('Run Tests') {
 
             matrix {
@@ -40,9 +41,8 @@ pipeline {
 
                     axis {
                         name 'BROWSER'
-                        values 'edge'
+                        values 'chrome', 'firefox', 'edge'
                     }
-
                 }
 
                 stages {
@@ -53,22 +53,17 @@ pipeline {
 
                             bat """
                             echo Browser=%BROWSER%
-                                    echo Environment=${params.ENV}
+                            echo Environment=${params.ENV}
 
                             mvn clean test ^
                             -Dbrowser=%BROWSER% ^
-                                    -Denv=${params.ENV} ^
-                                    -Dsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
+                            -Denv=${params.ENV} ^
+                            -Dsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
                             """
-
                         }
-
                     }
-
                 }
-
             }
-
         }
     }
 
@@ -82,13 +77,19 @@ pipeline {
                     reportName: 'Extent Report',
                     keepAll: true,
                     alwaysLinkToLastBuild: true,
-                    allowMissing: false
+                    allowMissing: true
             ])
 
-            archiveArtifacts artifacts: 'Reports/**/*',
-                    fingerprint: true
+            archiveArtifacts(
+                    artifacts: 'Reports/**/*',
+                    fingerprint: true,
+                    allowEmptyArchive: true
+            )
 
-            junit 'target/surefire-reports/*.xml'
+            junit(
+                    testResults: 'target/surefire-reports/*.xml',
+                    allowEmptyResults: true
+            )
 
             allure([
                     includeProperties: false,
@@ -104,6 +105,9 @@ pipeline {
         failure {
             echo 'Build Failed'
         }
-    }
 
+        unstable {
+            echo 'Build Unstable'
+        }
+    }
 }
