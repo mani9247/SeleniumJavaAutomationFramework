@@ -50,10 +50,7 @@ pipeline {
                     stage('Execute Tests') {
 
                         steps {
-
-                            dir("workspace-${BROWSER}") {
-
-                                bat """
+                            bat """
                                     echo Browser=%BROWSER%
                                     echo Environment=${params.ENV}
 
@@ -68,7 +65,6 @@ pipeline {
                 }
             }
         }
-    }
 
     // ✅ post is OUTSIDE stages
     post {
