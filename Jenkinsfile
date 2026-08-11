@@ -51,75 +51,59 @@ pipeline {
 
                         steps {
 
-                            script {
+                            dir("workspace-${BROWSER}") {
 
-                                def browserWorkspace =
-                                        "${env.WORKSPACE}\\${BROWSER}"
+                                bat """
+                                    echo Browser=%BROWSER%
+                                    echo Environment=${params.ENV}
 
-                                dir(browserWorkspace) {
-
-                                    bat """
-                                echo ==============================
-                                echo Browser=%BROWSER%
-                                echo Environment=${params.ENV}
-                                echo Workspace=%CD%
-                                echo ==============================
-
-                                mvn clean test ^
-                                -Dbrowser=%BROWSER% ^
-                                -Denv=${params.ENV} ^
-                                -Dsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
-                            """
-                                }
+                                    mvn clean test ^
+                                    -Dbrowser=%BROWSER% ^
+                                    -Denv=${params.ENV} ^
+                                    -Dsurefire.suiteXmlFiles=src/test/resources/${params.SUITE}.xml
+                                """
                             }
                         }
                     }
                 }
             }
         }
+    }
 
-        post {
+    // ✅ post is OUTSIDE stages
+    post {
 
-            always {
+        always {
 
-                publishHTML(target: [
-                        reportDir            : 'Reports',
-                        reportFiles          : 'AutomationReport.html',
-                        reportName           : 'Extent Report',
-                        keepAll              : true,
-                        alwaysLinkToLastBuild: true,
-                        allowMissing         : true
-                ])
+            publishHTML(target: [
+                    reportDir: 'Reports',
+                    reportFiles: 'AutomationReport.html',
+                    reportName: 'Extent Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+            ])
 
-                archiveArtifacts(
-                        artifacts: 'Reports/**/*',
-                        fingerprint: true,
-                        allowEmptyArchive: true
-                )
+            archiveArtifacts(
+                    artifacts: 'Reports/**/*',
+                    fingerprint: true
+            )
 
-                junit(
-                        testResults: 'target/surefire-reports/*.xml',
-                        allowEmptyResults: true
-                )
+            junit 'target/surefire-reports/*.xml'
 
-                allure([
-                        includeProperties: false,
-                        jdk              : '',
-                        results          : [[path: 'allure-results']]
-                ])
-            }
+            allure([
+                    includeProperties: false,
+                    jdk: '',
+                    results: [[path: 'allure-results']]
+            ])
+        }
 
-            success {
-                echo 'Build Successful'
-            }
+        success {
+            echo 'Build Successful'
+        }
 
-            failure {
-                echo 'Build Failed'
-            }
-
-            unstable {
-                echo 'Build Unstable'
-            }
+        failure {
+            echo 'Build Failed'
         }
     }
 }
