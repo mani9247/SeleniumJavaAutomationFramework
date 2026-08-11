@@ -2,13 +2,13 @@ pipeline {
 
     agent any
 
-    options {
-        disableConcurrentBuilds()
-    }
+  //  options {
+    //    disableConcurrentBuilds()
+  //  }
 
-    triggers {
-        cron('H/5 * * * *')
-    }
+  //  triggers {
+    //    cron('H/5 * * * *')
+   // }
 
     parameters {
 
@@ -35,7 +35,7 @@ pipeline {
 
                     axis {
                         name 'BROWSER'
-                        values 'chrome', 'firefox', 'edge'
+                        values 'chrome', 'firefox'
                     }
                 }
 
@@ -103,7 +103,7 @@ pipeline {
 
                 script {
 
-                    ['chrome', 'firefox', 'edge'].each { browser ->
+                    ['chrome', 'firefox'].each { browser ->
 
                         dir("results/${browser}") {
 
@@ -147,7 +147,7 @@ pipeline {
                         mkdir allure-combined
                     """
 
-                    ['chrome', 'firefox', 'edge'].each { browser ->
+                    ['chrome', 'firefox'].each { browser ->
 
                         bat """
                             if exist results\\${browser}\\allure-results (
