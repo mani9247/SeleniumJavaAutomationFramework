@@ -2,6 +2,14 @@ pipeline {
 
     agent any
 
+    options {
+        disableConcurrentBuilds()
+    }
+
+    triggers {
+        cron('H/5 * * * *')
+    }
+
     parameters {
 
          choice(
