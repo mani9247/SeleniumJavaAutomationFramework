@@ -2,6 +2,7 @@ package Base;
 
 import Utilities.ConfigReader;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -11,7 +12,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
 
 public class DriverFactory {
@@ -27,136 +28,234 @@ public class DriverFactory {
         if (browser == null || browser.isBlank()) {
             browser = config.getBrowser();
         }
+
         System.out.println("Execution : " + config.getExecution());
         System.out.println("Grid URL : " + config.getGridUrl());
         System.out.println("Browser : " + browser);
 
         try {
 
-            switch (browser.toLowerCase()) {
+            // =====================================================
+            // CHROME
+            // =====================================================
 
-                case "chrome":
+            if (browser.equalsIgnoreCase("chrome")) {
 
-                    ChromeOptions chromeOptions = new ChromeOptions();
+                ChromeOptions chromeOptions = new ChromeOptions();
 
-                    // Docker/Grid Stability
-                    chromeOptions.addArguments("--disable-dev-shm-usage");
-                    chromeOptions.addArguments("--no-sandbox");
-                    chromeOptions.addArguments("--remote-allow-origins=*");
-                    chromeOptions.addArguments("--disable-gpu");
+                // Docker / Selenium Grid stability
+                chromeOptions.addArguments("--disable-dev-shm-usage");
+                chromeOptions.addArguments("--no-sandbox");
+                chromeOptions.addArguments("--remote-allow-origins=*");
+                chromeOptions.addArguments("--disable-gpu");
 
-                    if ("true".equalsIgnoreCase(System.getProperty("headless"))) {
-                        chromeOptions.addArguments("--headless=new");
-                    }
+                chromeOptions.setAcceptInsecureCerts(true);
+                chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
-                    if (config.getExecution().equalsIgnoreCase("grid")) {
+                if ("true".equalsIgnoreCase(
+                        System.getProperty("headless"))) {
 
-                        driver.set(new RemoteWebDriver(
-                                new URL(config.getGridUrl()),
-                                chromeOptions));
+                    chromeOptions.addArguments("--headless=new");
+                }
 
-                    } else {
+                if (config.getExecution().equalsIgnoreCase("grid")) {
 
-                        driver.set(new ChromeDriver(chromeOptions));
+                    driver.set(
+                            new RemoteWebDriver(
+                                    URI.create(config.getGridUrl()).toURL(),
+                                    chromeOptions
+                            )
+                    );
 
-                    }
+                } else {
 
-                    break;
-
-                case "firefox":
-
-                    FirefoxOptions firefoxOptions = new FirefoxOptions();
-
-                    if ("true".equalsIgnoreCase(System.getProperty("headless"))) {
-                        firefoxOptions.addArguments("-headless");
-                    }
-
-                    if (config.getExecution().equalsIgnoreCase("grid")) {
-
-                        driver.set(new RemoteWebDriver(
-                                new URL(config.getGridUrl()),
-                                firefoxOptions));
-
-                    } else {
-
-                        driver.set(new FirefoxDriver(firefoxOptions));
-
-                    }
-
-                    break;
-
-                case "edge":
-
-                    EdgeOptions edgeOptions = new EdgeOptions();
-
-                    // Docker/Grid Stability
-                    edgeOptions.addArguments("--disable-dev-shm-usage");
-                    edgeOptions.addArguments("--no-sandbox");
-
-                    if ("true".equalsIgnoreCase(System.getProperty("headless"))) {
-                        edgeOptions.addArguments("--headless=new");
-                    }
-
-                    if (config.getExecution().equalsIgnoreCase("grid")) {
-
-                        driver.set(new RemoteWebDriver(
-                                new URL(config.getGridUrl()),
-                                edgeOptions));
-
-                    } else {
-
-                        driver.set(new EdgeDriver(edgeOptions));
-
-                    }
-
-                    break;
-
-                default:
-                    throw new RuntimeException("Invalid Browser : " + browser);
-
+                    driver.set(
+                            new ChromeDriver(chromeOptions)
+                    );
+                }
             }
 
-            // Window handling
+
+            // =====================================================
+            // FIREFOX
+            // =====================================================
+
+            else if (browser.equalsIgnoreCase("firefox")) {
+
+                FirefoxOptions firefoxOptions = new FirefoxOptions();
+
+                firefoxOptions.setAcceptInsecureCerts(true);
+
+                // Important for Jenkins/Grid navigation timeout
+                firefoxOptions.setPageLoadStrategy(
+                        PageLoadStrategy.EAGER
+                );
+
+                if ("true".equalsIgnoreCase(
+                        System.getProperty("headless"))) {
+
+                    firefoxOptions.addArguments("-headless");
+                }
+
+                if (config.getExecution().equalsIgnoreCase("grid")) {
+
+                    driver.set(
+                            new RemoteWebDriver(
+                                    URI.create(config.getGridUrl()).toURL(),
+                                    firefoxOptions
+                            )
+                    );
+
+                } else {
+
+                    driver.set(
+                            new FirefoxDriver(firefoxOptions)
+                    );
+                }
+            }
+
+
+            // =====================================================
+            // EDGE
+            // =====================================================
+
+            else if (browser.equalsIgnoreCase("edge")) {
+
+                EdgeOptions edgeOptions = new EdgeOptions();
+
+                // Docker / Selenium Grid stability
+                edgeOptions.addArguments("--disable-dev-shm-usage");
+                edgeOptions.addArguments("--no-sandbox");
+
+                edgeOptions.setAcceptInsecureCerts(true);
+                edgeOptions.setPageLoadStrategy(
+                        PageLoadStrategy.EAGER
+                );
+
+                if ("true".equalsIgnoreCase(
+                        System.getProperty("headless"))) {
+
+                    edgeOptions.addArguments("--headless=new");
+                }
+
+                if (config.getExecution().equalsIgnoreCase("grid")) {
+
+                    driver.set(
+                            new RemoteWebDriver(
+                                    URI.create(config.getGridUrl()).toURL(),
+                                    edgeOptions
+                            )
+                    );
+
+                } else {
+
+                    driver.set(
+                            new EdgeDriver(edgeOptions)
+                    );
+                }
+            }
+
+
+            // =====================================================
+            // INVALID BROWSER
+            // =====================================================
+
+            else {
+
+                throw new RuntimeException(
+                        "Invalid Browser : " + browser
+                );
+            }
+
+
+            // =====================================================
+            // WINDOW SIZE
+            // =====================================================
+
             if (config.getExecution().equalsIgnoreCase("grid")) {
 
-                getDriver().manage().window().setSize(new Dimension(1920, 1080));
+                getDriver()
+                        .manage()
+                        .window()
+                        .setSize(new Dimension(1920, 1080));
 
             } else {
 
-                getDriver().manage().window().maximize();
-
+                getDriver()
+                        .manage()
+                        .window()
+                        .maximize();
             }
 
-            // Waits
-            getDriver().manage().timeouts().implicitlyWait(
-                    Duration.ofSeconds(config.getImplicitWait()));
 
-            getDriver().manage().timeouts().pageLoadTimeout(
-                    Duration.ofSeconds(config.getPageLoadTimeout()));
+            // =====================================================
+            // TIMEOUTS
+            // =====================================================
 
-            // Launch Application
-            getDriver().get(config.getUrl());
+            getDriver()
+                    .manage()
+                    .timeouts()
+                    .implicitlyWait(
+                            Duration.ofSeconds(
+                                    config.getImplicitWait()
+                            )
+                    );
+
+            getDriver()
+                    .manage()
+                    .timeouts()
+                    .pageLoadTimeout(
+                            Duration.ofSeconds(
+                                    config.getPageLoadTimeout()
+                            )
+                    );
+
+
+            // =====================================================
+            // OPEN APPLICATION
+            // =====================================================
 
             System.out.println("-------------------------------------");
             System.out.println("Browser      : " + browser);
-            System.out.println("Execution : " + config.getExecution());
-            System.out.println("Grid URL  : " + config.getGridUrl());
             System.out.println("Execution    : " + config.getExecution());
+            System.out.println("Grid URL     : " + config.getGridUrl());
             System.out.println("Thread ID    : " + Thread.currentThread().getId());
             System.out.println("-------------------------------------");
 
+            System.out.println(
+                    "Opening URL : " + config.getUrl()
+            );
+
+            getDriver().get(config.getUrl());
+
+            System.out.println(
+                    "Application opened successfully."
+            );
+
         } catch (Exception e) {
 
-            throw new RuntimeException("Failed to initialize driver : " + e.getMessage(), e);
-
+            throw new RuntimeException(
+                    "Failed to initialize driver : "
+                            + e.getMessage(),
+                    e
+            );
         }
     }
+
+
+    // =====================================================
+    // GET DRIVER
+    // =====================================================
 
     public static WebDriver getDriver() {
 
         return driver.get();
-
     }
+
+
+    // =====================================================
+    // QUIT DRIVER
+    // =====================================================
 
     public static void quitDriver() {
 
@@ -165,7 +264,6 @@ public class DriverFactory {
             driver.get().quit();
 
             driver.remove();
-
         }
     }
 }
