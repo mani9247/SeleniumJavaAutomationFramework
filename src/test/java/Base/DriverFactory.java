@@ -184,6 +184,9 @@ public class DriverFactory {
                            // WINDOW SIZE
             // =====================================================
 
+            System.out.println("DEBUG Execution = [" + config.getExecution() + "]");
+            System.out.println("DEBUG Driver Class = " + getDriver().getClass().getName());
+
             if (config.getExecution().equalsIgnoreCase("grid")) {
 
                 System.out.println("Grid execution - skipping window resize");
