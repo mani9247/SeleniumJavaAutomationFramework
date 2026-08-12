@@ -27,7 +27,7 @@ pipeline {
 
                     axis {
                         name 'BROWSER'
-                        values 'chrome', 'firefox'
+                        values 'chrome', 'firefox', 'edge'
                     }
                 }
 
@@ -117,7 +117,7 @@ pipeline {
 
                 script {
 
-                    ['chrome', 'firefox'].each { browser ->
+                    ['chrome', 'firefox', 'edge'].each { browser ->
 
                         echo "===================================="
                         echo "Collecting ${browser} results"
@@ -201,7 +201,7 @@ pipeline {
                         mkdir allure-combined
                     """
 
-                    ['chrome', 'firefox'].each { browser ->
+                    ['chrome', 'firefox', 'edge'].each { browser ->
 
                         bat """
                             echo ==========================================
