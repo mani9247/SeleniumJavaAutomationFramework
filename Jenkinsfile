@@ -39,15 +39,7 @@ pipeline {
 
                             ws("${env.WORKSPACE}@${BROWSER}") {
 
-                                cleanWs()
-
                                 checkout scm
-
-                                echo "===================================="
-                                echo "Browser Workspace"
-                                echo "Browser : ${BROWSER}"
-                                echo "Workspace : ${env.WORKSPACE}@${BROWSER}"
-                                echo "===================================="
                             }
                         }
                     }
@@ -80,32 +72,25 @@ pipeline {
 
                             ws("${env.WORKSPACE}@${BROWSER}") {
 
-                                echo "Collecting results for ${BROWSER}"
-
                                 bat """
-                                    echo ==============================
-                                    echo Surefire Reports
-                                    echo ==============================
+                                    echo ==========================================
+                                    echo COLLECTING RESULTS FOR %BROWSER%
+                                    echo ==========================================
+
+                                    echo Current workspace:
+                                    echo %CD%
+
+                                    echo.
+                                    echo Checking JUnit reports...
 
                                     if exist target\\surefire-reports (
                                         dir target\\surefire-reports
                                     ) else (
-                                        echo No Surefire report directory found
+                                        echo No target\\surefire-reports directory found
                                     )
 
-                                    echo ==============================
-                                    echo Extent Reports
-                                    echo ==============================
-
-                                    if exist Reports (
-                                        dir Reports
-                                    ) else (
-                                        echo No Reports directory found
-                                    )
-
-                                    echo ==============================
-                                    echo Allure Results
-                                    echo ==============================
+                                    echo.
+                                    echo Checking Allure results...
 
                                     if exist allure-results (
                                         dir allure-results
@@ -116,11 +101,7 @@ pipeline {
 
                                 stash(
                                         name: "results-${BROWSER}",
-                                        includes: '''
-                                        target/surefire-reports/**
-                                        Reports/**
-                                        allure-results/**
-                                    ''',
+                                        includes: "target/surefire-reports/**/*,allure-results/**/*,Reports/**/*",
                                         allowEmpty: true
                                 )
                             }
@@ -147,6 +128,12 @@ pipeline {
                             deleteDir()
 
                             unstash "results-${browser}"
+
+                            bat """
+                                echo.
+                                echo ===== ${browser} RESULTS =====
+                                dir /s
+                            """
                         }
                     }
                 }
@@ -189,19 +176,6 @@ pipeline {
 
                     echo "Publishing test results..."
 
-                    echo "=========================================="
-                    echo "JUnit XML FILES"
-                    echo "=========================================="
-
-                    bat """
-                        echo Chrome JUnit files:
-                        dir results\\chrome\\target\\surefire-reports\\TEST-*.xml 2>nul
-
-                        echo.
-                        echo Firefox JUnit files:
-                        dir results\\firefox\\target\\surefire-reports\\TEST-*.xml 2>nul
-                    """
-
                     junit(
                             testResults: 'results/**/target/surefire-reports/TEST-*.xml',
                             allowEmptyResults: false
@@ -210,7 +184,7 @@ pipeline {
                     archiveArtifacts(
                             artifacts: 'results/**/*',
                             fingerprint: true,
-                            allowEmptyArchive: true
+                            allowEmptyArchive: false
                     )
                 }
             }
@@ -224,32 +198,23 @@ pipeline {
 
                     bat """
                         if exist allure-combined rmdir /S /Q allure-combined
-
                         mkdir allure-combined
                     """
 
                     ['chrome', 'firefox'].each { browser ->
 
                         bat """
-                            if exist results\\${browser}\\allure-results (
-                                echo Copying ${browser} Allure results...
+                            echo ==========================================
+                            echo Copying Allure results from ${browser}
+                            echo ==========================================
 
-                                xcopy /E /I /Y ^
-                                results\\${browser}\\allure-results ^
-                                allure-combined
+                            if exist results\\${browser}\\allure-results (
+                                xcopy /E /I /Y results\\${browser}\\allure-results allure-combined
                             ) else (
-                                echo No Allure results for ${browser}
+                                echo No Allure results found for ${browser}
                             )
                         """
                     }
-
-                    echo "=========================================="
-                    echo "Combined Allure Results"
-                    echo "=========================================="
-
-                    bat """
-                        dir allure-combined
-                    """
 
                     allure([
                             includeProperties: false,
