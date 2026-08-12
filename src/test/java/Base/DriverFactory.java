@@ -116,18 +116,20 @@ public class DriverFactory {
 
 
             // =====================================================
-            // EDGE
+                         // EDGE
             // =====================================================
 
             else if (browser.equalsIgnoreCase("edge")) {
 
                 EdgeOptions edgeOptions = new EdgeOptions();
 
-                // Docker / Selenium Grid stability
                 edgeOptions.addArguments("--disable-dev-shm-usage");
                 edgeOptions.addArguments("--no-sandbox");
+                edgeOptions.addArguments("--disable-gpu");
+                edgeOptions.addArguments("--remote-allow-origins=*");
 
                 edgeOptions.setAcceptInsecureCerts(true);
+
                 edgeOptions.setPageLoadStrategy(
                         PageLoadStrategy.EAGER
                 );
@@ -140,11 +142,21 @@ public class DriverFactory {
 
                 if (config.getExecution().equalsIgnoreCase("grid")) {
 
+                    System.out.println(
+                            "Creating Edge RemoteWebDriver..."
+                    );
+
                     driver.set(
                             new RemoteWebDriver(
-                                    URI.create(config.getGridUrl()).toURL(),
+                                    URI.create(
+                                            config.getGridUrl()
+                                    ).toURL(),
                                     edgeOptions
                             )
+                    );
+
+                    System.out.println(
+                            "Edge RemoteWebDriver created successfully."
                     );
 
                 } else {
@@ -169,24 +181,29 @@ public class DriverFactory {
 
 
             // =====================================================
-            // WINDOW SIZE
+                           // WINDOW SIZE
             // =====================================================
 
             if (config.getExecution().equalsIgnoreCase("grid")) {
 
-                getDriver()
-                        .manage()
-                        .window()
-                        .setSize(new Dimension(1920, 1080));
+                System.out.println("Grid execution - skipping window resize");
 
             } else {
 
-                getDriver()
-                        .manage()
-                        .window()
-                        .maximize();
-            }
+                try {
 
+                    getDriver()
+                            .manage()
+                            .window()
+                            .maximize();
+
+                } catch (Exception e) {
+
+                    System.out.println(
+                            "Window maximize skipped: " + e.getMessage()
+                    );
+                }
+            }
 
             // =====================================================
             // TIMEOUTS
