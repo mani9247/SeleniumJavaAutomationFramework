@@ -16,7 +16,10 @@ public class DriverFactory {
     private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
     private static final String GRID_URL =
-            System.getProperty("gridUrl", "http://localhost:4444/wd/hub");
+            System.getProperty(
+                    "gridUrl",
+                    "http://localhost:4444/wd/hub"
+            );
 
     private static final String BASE_URL =
             System.getProperty(
@@ -35,11 +38,17 @@ public class DriverFactory {
             WebDriver webDriver;
 
             System.out.println("======================================");
-            System.out.println("Starting browser: " + browser);
-            System.out.println("Grid URL: " + GRID_URL);
+            System.out.println("Starting browser : " + browser);
+            System.out.println("Grid URL         : " + GRID_URL);
+            System.out.println("Base URL         : " + BASE_URL);
             System.out.println("======================================");
 
+
             switch (browser.toLowerCase()) {
+
+                // =========================================================
+                // CHROME
+                // =========================================================
 
                 case "chrome":
 
@@ -52,8 +61,11 @@ public class DriverFactory {
                     chromeOptions.addArguments("--disable-extensions");
                     chromeOptions.addArguments("--disable-background-networking");
                     chromeOptions.addArguments("--disable-software-rasterizer");
+                    chromeOptions.addArguments("--window-size=1920,1080");
 
-                    chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+                    chromeOptions.setPageLoadStrategy(
+                            PageLoadStrategy.EAGER
+                    );
 
                     webDriver = new RemoteWebDriver(
                             new URL(GRID_URL),
@@ -63,13 +75,20 @@ public class DriverFactory {
                     break;
 
 
+                // =========================================================
+                // FIREFOX
+                // =========================================================
+
                 case "firefox":
 
-                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    FirefoxOptions firefoxOptions =
+                            new FirefoxOptions();
 
                     firefoxOptions.addArguments("-headless");
 
-                    firefoxOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+                    firefoxOptions.setPageLoadStrategy(
+                            PageLoadStrategy.EAGER
+                    );
 
                     webDriver = new RemoteWebDriver(
                             new URL(GRID_URL),
@@ -79,29 +98,91 @@ public class DriverFactory {
                     break;
 
 
+                // =========================================================
+                // EDGE
+                // =========================================================
+
                 case "edge":
 
-                    EdgeOptions edgeOptions = new EdgeOptions();
+                    EdgeOptions edgeOptions =
+                            new EdgeOptions();
 
                     /*
-                     * IMPORTANT FOR EDGE IN DOCKER
+                     * Headless mode is important because
+                     * Jenkins + Docker does not need a visible browser.
                      */
                     edgeOptions.addArguments("--headless=new");
+
+                    /*
+                     * Docker stability
+                     */
                     edgeOptions.addArguments("--no-sandbox");
                     edgeOptions.addArguments("--disable-dev-shm-usage");
                     edgeOptions.addArguments("--disable-gpu");
-                    edgeOptions.addArguments("--disable-extensions");
-                    edgeOptions.addArguments("--disable-background-networking");
-                    edgeOptions.addArguments("--disable-software-rasterizer");
 
                     /*
-                     * Prevent some browser features from causing
-                     * renderer/network delays.
+                     * Browser window
                      */
-                    edgeOptions.addArguments("--disable-features=Translate");
-                    edgeOptions.addArguments("--disable-features=BackForwardCache");
+                    edgeOptions.addArguments(
+                            "--window-size=1920,1080"
+                    );
 
-                    edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+                    /*
+                     * Disable unnecessary browser features
+                     */
+                    edgeOptions.addArguments("--disable-extensions");
+                    edgeOptions.addArguments(
+                            "--disable-background-networking"
+                    );
+                    edgeOptions.addArguments(
+                            "--disable-software-rasterizer"
+                    );
+
+                    /*
+                     * Disable features that can sometimes
+                     * cause delays in automated environments.
+                     */
+                    edgeOptions.addArguments(
+                            "--disable-features=Translate"
+                    );
+
+                    edgeOptions.addArguments(
+                            "--disable-features=BackForwardCache"
+                    );
+
+                    /*
+                     * Disable first-run browser behaviour.
+                     */
+                    edgeOptions.addArguments(
+                            "--no-first-run"
+                    );
+
+                    edgeOptions.addArguments(
+                            "--no-default-browser-check"
+                    );
+
+                    /*
+                     * Reduce background activity.
+                     */
+                    edgeOptions.addArguments(
+                            "--disable-background-timer-throttling"
+                    );
+
+                    edgeOptions.addArguments(
+                            "--disable-renderer-backgrounding"
+                    );
+
+                    edgeOptions.addArguments(
+                            "--disable-backgrounding-occluded-windows"
+                    );
+
+                    /*
+                     * Do not wait unnecessarily for every page
+                     * resource to finish loading.
+                     */
+                    edgeOptions.setPageLoadStrategy(
+                            PageLoadStrategy.EAGER
+                    );
 
                     webDriver = new RemoteWebDriver(
                             new URL(GRID_URL),
@@ -119,29 +200,74 @@ public class DriverFactory {
             }
 
 
+            // =============================================================
+            // STORE DRIVER
+            // =============================================================
+
             driver.set(webDriver);
 
-            /*
-             * Selenium timeouts
-             */
-            getDriver().manage()
+
+            // =============================================================
+            // SELENIUM TIMEOUTS
+            // =============================================================
+
+            getDriver()
+                    .manage()
                     .timeouts()
-                    .implicitlyWait(Duration.ofSeconds(10));
+                    .implicitlyWait(
+                            Duration.ofSeconds(10)
+                    );
 
-            getDriver().manage()
+            getDriver()
+                    .manage()
                     .timeouts()
-                    .pageLoadTimeout(Duration.ofSeconds(60));
+                    .pageLoadTimeout(
+                            Duration.ofSeconds(45)
+                    );
 
-            getDriver().manage()
+            getDriver()
+                    .manage()
                     .timeouts()
-                    .scriptTimeout(Duration.ofSeconds(30));
+                    .scriptTimeout(
+                            Duration.ofSeconds(30)
+                    );
 
 
-            /*
-             * Navigate to application
-             */
+            // =============================================================
+            // BROWSER WINDOW
+            // =============================================================
+
+            try {
+
+                getDriver()
+                        .manage()
+                        .window()
+                        .setSize(
+                                new org.openqa.selenium.Dimension(
+                                        1920,
+                                        1080
+                                )
+                        );
+
+            } catch (Exception e) {
+
+                System.out.println(
+                        "Unable to set browser window size: "
+                                + e.getMessage()
+                );
+            }
+
+
+            // =============================================================
+            // OPEN APPLICATION
+            // =============================================================
+
             System.out.println(
-                    "Opening application: " + BASE_URL
+                    "Opening application..."
+            );
+
+            System.out.println(
+                    "URL: " + BASE_URL
             );
 
             getDriver().get(BASE_URL);
@@ -150,14 +276,40 @@ public class DriverFactory {
                     "Application opened successfully."
             );
 
-        } catch (MalformedURLException e) {
-
-            throw new RuntimeException(
-                    "Invalid Selenium Grid URL: " + GRID_URL,
-                    e
+            System.out.println(
+                    "Current URL: "
+                            + getDriver().getCurrentUrl()
             );
 
-        } catch (Exception e) {
+            System.out.println(
+                    "Page title: "
+                            + getDriver().getTitle()
+            );
+
+        }
+
+
+        // =============================================================
+        // INVALID GRID URL
+        // =============================================================
+
+        catch (MalformedURLException e) {
+
+            quitDriver();
+
+            throw new RuntimeException(
+                    "Invalid Selenium Grid URL: "
+                            + GRID_URL,
+                    e
+            );
+        }
+
+
+        // =============================================================
+        // OTHER DRIVER FAILURE
+        // =============================================================
+
+        catch (Exception e) {
 
             quitDriver();
 
@@ -165,21 +317,32 @@ public class DriverFactory {
                     "Failed to initialize driver for browser: "
                             + browser
                             + " | Grid URL: "
-                            + GRID_URL,
+                            + GRID_URL
+                            + " | Error: "
+                            + e.getMessage(),
                     e
             );
         }
     }
 
 
+    // =============================================================
+    // QUIT DRIVER
+    // =============================================================
+
     public static void quitDriver() {
 
         try {
 
-            if (driver.get() != null) {
+            WebDriver webDriver = driver.get();
 
-                driver.get().quit();
+            if (webDriver != null) {
 
+                System.out.println(
+                        "Closing browser..."
+                );
+
+                webDriver.quit();
             }
 
         } catch (Exception e) {

@@ -9,7 +9,7 @@ pipeline {
     }
 
     environment {
-        GRID_URL = 'http://localhost:4444'
+        GRID_URL = 'http://localhost:4444/wd/hub'
         EXECUTION = 'grid'
         MAVEN_OPTS = '-Xmx2048m'
     }
@@ -122,7 +122,7 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=chrome ^
                                             -Dexecution=grid ^
-                                            -Dgrid.url=%GRID_URL%
+                                            -DgridUrl=%GRID_URL%
                                     '''
                                 }
                             }
@@ -187,7 +187,7 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=firefox ^
                                             -Dexecution=grid ^
-                                            -Dgrid.url=%GRID_URL%
+                                            -DgridUrl=%GRID_URL%
                                     '''
                                 }
                             }
@@ -251,7 +251,7 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=edge ^
                                             -Dexecution=grid ^
-                                            -Dgrid.url=%GRID_URL%
+                                            -DgridUrl=%GRID_URL%
                                     '''
                                 }
                             }
