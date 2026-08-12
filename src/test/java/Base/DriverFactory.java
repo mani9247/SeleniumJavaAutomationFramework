@@ -1,287 +1,195 @@
 package Base;
 
-import Utilities.ConfigReader;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.net.URI;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 
 public class DriverFactory {
 
-    private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
-    public static void initDriver() {
+    private static final String GRID_URL =
+            System.getProperty("gridUrl", "http://localhost:4444/wd/hub");
 
-        ConfigReader config = new ConfigReader();
+    private static final String BASE_URL =
+            System.getProperty(
+                    "baseUrl",
+                    "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login"
+            );
 
-        String browser = System.getProperty("browser");
+    public static WebDriver getDriver() {
+        return driver.get();
+    }
 
-        if (browser == null || browser.isBlank()) {
-            browser = config.getBrowser();
-        }
-
-        System.out.println("Execution : " + config.getExecution());
-        System.out.println("Grid URL : " + config.getGridUrl());
-        System.out.println("Browser : " + browser);
+    public static void initDriver(String browser) {
 
         try {
 
-            // =====================================================
-            // CHROME
-            // =====================================================
+            WebDriver webDriver;
 
-            if (browser.equalsIgnoreCase("chrome")) {
+            System.out.println("======================================");
+            System.out.println("Starting browser: " + browser);
+            System.out.println("Grid URL: " + GRID_URL);
+            System.out.println("======================================");
 
-                ChromeOptions chromeOptions = new ChromeOptions();
+            switch (browser.toLowerCase()) {
 
-                // Docker / Selenium Grid stability
-                chromeOptions.addArguments("--disable-dev-shm-usage");
-                chromeOptions.addArguments("--no-sandbox");
-                chromeOptions.addArguments("--remote-allow-origins=*");
-                chromeOptions.addArguments("--disable-gpu");
+                case "chrome":
 
-                chromeOptions.setAcceptInsecureCerts(true);
-                chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
-
-                if ("true".equalsIgnoreCase(
-                        System.getProperty("headless"))) {
+                    ChromeOptions chromeOptions = new ChromeOptions();
 
                     chromeOptions.addArguments("--headless=new");
-                }
+                    chromeOptions.addArguments("--no-sandbox");
+                    chromeOptions.addArguments("--disable-dev-shm-usage");
+                    chromeOptions.addArguments("--disable-gpu");
+                    chromeOptions.addArguments("--disable-extensions");
+                    chromeOptions.addArguments("--disable-background-networking");
+                    chromeOptions.addArguments("--disable-software-rasterizer");
 
-                if (config.getExecution().equalsIgnoreCase("grid")) {
+                    chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
-                    driver.set(
-                            new RemoteWebDriver(
-                                    URI.create(config.getGridUrl()).toURL(),
-                                    chromeOptions
-                            )
+                    webDriver = new RemoteWebDriver(
+                            new URL(GRID_URL),
+                            chromeOptions
                     );
 
-                } else {
-
-                    driver.set(
-                            new ChromeDriver(chromeOptions)
-                    );
-                }
-            }
+                    break;
 
 
-            // =====================================================
-            // FIREFOX
-            // =====================================================
+                case "firefox":
 
-            else if (browser.equalsIgnoreCase("firefox")) {
-
-                FirefoxOptions firefoxOptions = new FirefoxOptions();
-
-                firefoxOptions.setAcceptInsecureCerts(true);
-
-                // Important for Jenkins/Grid navigation timeout
-                firefoxOptions.setPageLoadStrategy(
-                        PageLoadStrategy.EAGER
-                );
-
-                if ("true".equalsIgnoreCase(
-                        System.getProperty("headless"))) {
+                    FirefoxOptions firefoxOptions = new FirefoxOptions();
 
                     firefoxOptions.addArguments("-headless");
-                }
 
-                if (config.getExecution().equalsIgnoreCase("grid")) {
+                    firefoxOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
-                    driver.set(
-                            new RemoteWebDriver(
-                                    URI.create(config.getGridUrl()).toURL(),
-                                    firefoxOptions
-                            )
+                    webDriver = new RemoteWebDriver(
+                            new URL(GRID_URL),
+                            firefoxOptions
                     );
 
-                } else {
-
-                    driver.set(
-                            new FirefoxDriver(firefoxOptions)
-                    );
-                }
-            }
+                    break;
 
 
-            // =====================================================
-                         // EDGE
-            // =====================================================
+                case "edge":
 
-            else if (browser.equalsIgnoreCase("edge")) {
+                    EdgeOptions edgeOptions = new EdgeOptions();
 
-                EdgeOptions edgeOptions = new EdgeOptions();
-
-                edgeOptions.addArguments("--disable-dev-shm-usage");
-                edgeOptions.addArguments("--no-sandbox");
-                edgeOptions.addArguments("--disable-gpu");
-                edgeOptions.addArguments("--remote-allow-origins=*");
-
-                edgeOptions.setAcceptInsecureCerts(true);
-
-                edgeOptions.setPageLoadStrategy(
-                        PageLoadStrategy.EAGER
-                );
-
-                if ("true".equalsIgnoreCase(
-                        System.getProperty("headless"))) {
-
+                    /*
+                     * IMPORTANT FOR EDGE IN DOCKER
+                     */
                     edgeOptions.addArguments("--headless=new");
-                }
+                    edgeOptions.addArguments("--no-sandbox");
+                    edgeOptions.addArguments("--disable-dev-shm-usage");
+                    edgeOptions.addArguments("--disable-gpu");
+                    edgeOptions.addArguments("--disable-extensions");
+                    edgeOptions.addArguments("--disable-background-networking");
+                    edgeOptions.addArguments("--disable-software-rasterizer");
 
-                if (config.getExecution().equalsIgnoreCase("grid")) {
+                    /*
+                     * Prevent some browser features from causing
+                     * renderer/network delays.
+                     */
+                    edgeOptions.addArguments("--disable-features=Translate");
+                    edgeOptions.addArguments("--disable-features=BackForwardCache");
 
-                    System.out.println(
-                            "Creating Edge RemoteWebDriver..."
+                    edgeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+
+                    webDriver = new RemoteWebDriver(
+                            new URL(GRID_URL),
+                            edgeOptions
                     );
 
-                    driver.set(
-                            new RemoteWebDriver(
-                                    URI.create(
-                                            config.getGridUrl()
-                                    ).toURL(),
-                                    edgeOptions
-                            )
-                    );
+                    break;
 
-                    System.out.println(
-                            "Edge RemoteWebDriver created successfully."
-                    );
 
-                } else {
+                default:
 
-                    driver.set(
-                            new EdgeDriver(edgeOptions)
+                    throw new IllegalArgumentException(
+                            "Unsupported browser: " + browser
                     );
-                }
             }
 
 
-            // =====================================================
-            // INVALID BROWSER
-            // =====================================================
+            driver.set(webDriver);
 
-            else {
-
-                throw new RuntimeException(
-                        "Invalid Browser : " + browser
-                );
-            }
-
-
-            // =====================================================
-                           // WINDOW SIZE
-            // =====================================================
-
-            System.out.println("DEBUG Execution = [" + config.getExecution() + "]");
-            System.out.println("DEBUG Driver Class = " + getDriver().getClass().getName());
-
-            if (config.getExecution().equalsIgnoreCase("grid")) {
-
-                System.out.println("Grid execution - skipping window resize");
-
-            } else {
-
-                try {
-
-                    getDriver()
-                            .manage()
-                            .window()
-                            .maximize();
-
-                } catch (Exception e) {
-
-                    System.out.println(
-                            "Window maximize skipped: " + e.getMessage()
-                    );
-                }
-            }
-
-            // =====================================================
-            // TIMEOUTS
-            // =====================================================
-
-            getDriver()
-                    .manage()
+            /*
+             * Selenium timeouts
+             */
+            getDriver().manage()
                     .timeouts()
-                    .implicitlyWait(
-                            Duration.ofSeconds(
-                                    config.getImplicitWait()
-                            )
-                    );
+                    .implicitlyWait(Duration.ofSeconds(10));
 
-            getDriver()
-                    .manage()
+            getDriver().manage()
                     .timeouts()
-                    .pageLoadTimeout(
-                            Duration.ofSeconds(
-                                    config.getPageLoadTimeout()
-                            )
-                    );
+                    .pageLoadTimeout(Duration.ofSeconds(60));
+
+            getDriver().manage()
+                    .timeouts()
+                    .scriptTimeout(Duration.ofSeconds(30));
 
 
-            // =====================================================
-            // OPEN APPLICATION
-            // =====================================================
-
-            System.out.println("-------------------------------------");
-            System.out.println("Browser      : " + browser);
-            System.out.println("Execution    : " + config.getExecution());
-            System.out.println("Grid URL     : " + config.getGridUrl());
-            System.out.println("Thread ID    : " + Thread.currentThread().getId());
-            System.out.println("-------------------------------------");
-
+            /*
+             * Navigate to application
+             */
             System.out.println(
-                    "Opening URL : " + config.getUrl()
+                    "Opening application: " + BASE_URL
             );
 
-            getDriver().get(config.getUrl());
+            getDriver().get(BASE_URL);
 
             System.out.println(
                     "Application opened successfully."
             );
 
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
 
             throw new RuntimeException(
-                    "Failed to initialize driver : "
-                            + e.getMessage(),
+                    "Invalid Selenium Grid URL: " + GRID_URL,
+                    e
+            );
+
+        } catch (Exception e) {
+
+            quitDriver();
+
+            throw new RuntimeException(
+                    "Failed to initialize driver for browser: "
+                            + browser
+                            + " | Grid URL: "
+                            + GRID_URL,
                     e
             );
         }
     }
 
 
-    // =====================================================
-    // GET DRIVER
-    // =====================================================
-
-    public static WebDriver getDriver() {
-
-        return driver.get();
-    }
-
-
-    // =====================================================
-    // QUIT DRIVER
-    // =====================================================
-
     public static void quitDriver() {
 
-        if (driver.get() != null) {
+        try {
 
-            driver.get().quit();
+            if (driver.get() != null) {
+
+                driver.get().quit();
+
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error while quitting driver: "
+                            + e.getMessage()
+            );
+
+        } finally {
 
             driver.remove();
         }
