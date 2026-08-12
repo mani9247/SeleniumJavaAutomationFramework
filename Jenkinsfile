@@ -16,6 +16,46 @@ pipeline {
                 description: 'Select Test Suite'
         )
     }
+    stage('Environment Check') {
+
+        steps {
+
+            bat """
+            echo ==========================================
+            echo JENKINS ENVIRONMENT CHECK
+            echo ==========================================
+
+            echo USERNAME:
+            whoami
+
+            echo COMPUTER:
+            hostname
+
+            echo JAVA:
+            java -version
+
+            echo MAVEN:
+            mvn -version
+
+            echo DOCKER:
+            docker version
+
+            echo DOCKER CONTAINERS:
+            docker ps
+
+            echo TEMP:
+            echo %TEMP%
+
+            echo TMP:
+            echo %TMP%
+
+            echo WORKSPACE:
+            echo %WORKSPACE%
+
+            echo ==========================================
+        """
+        }
+    }
 
     stages {
 
