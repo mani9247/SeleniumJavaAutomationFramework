@@ -39,6 +39,8 @@ pipeline {
 
                             ws("${env.WORKSPACE}@${BROWSER}") {
 
+                                deleteDir()
+
                                 checkout scm
                             }
                         }
@@ -164,6 +166,14 @@ pipeline {
                     ) else (
                         echo Firefox results NOT FOUND
                     )
+                    
+                    echo.
+                    echo EDGE:
+                    if exist results\\\\edge (
+                         dir results\\\\edge /s
+                    ) else (
+                       echo Edge results NOT FOUND
+                    )
                 """
             }
         }
@@ -175,6 +185,23 @@ pipeline {
                 script {
 
                     echo "Publishing test results..."
+
+                    bat """
+                echo ==========================================
+                echo JUNIT XML FILES
+                echo ==========================================
+
+                dir results\\chrome\\target\\surefire-reports
+                dir results\\firefox\\target\\surefire-reports
+                dir results\\edge\\target\\surefire-reports
+
+                echo.
+                echo ==========================================
+                echo SEARCHING FOR FAILURES / ERRORS / SKIPS
+                echo ==========================================
+
+                findstr /S /I /C:"failures=" /C:"errors=" /C:"skipped=" results\\*\\target\\surefire-reports\\TEST-*.xml
+            """
 
                     junit(
                             testResults: 'results/**/target/surefire-reports/TEST-*.xml',
