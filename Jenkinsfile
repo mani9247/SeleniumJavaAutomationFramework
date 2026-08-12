@@ -16,7 +16,8 @@ pipeline {
                 description: 'Select Test Suite'
         )
     }
-    stage('Environment Check') {
+    stages {
+      stage('Environment Check') {
 
         steps {
 
@@ -56,9 +57,6 @@ pipeline {
         """
         }
     }
-
-    stages {
-
         stage('Run Tests') {
 
             matrix {
@@ -77,9 +75,7 @@ pipeline {
 
                         steps {
 
-                            ws("${env.WORKSPACE}@${BROWSER}") {
-
-                                deleteDir()
+                            ws("${env.WORKSPACE}@${BROWSER}"){
 
                                 checkout scm
                             }
