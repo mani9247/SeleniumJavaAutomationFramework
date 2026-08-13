@@ -140,13 +140,13 @@ pipeline {
                                         echo.
 
                                         mvn clean test ^
-                                            -Dbrowser=chrome ^
-                                            -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL% ^
-                                            -Dallure.results.directory=allure-results
-                                    '''
-                                }
-                            }
+                                                 -Dbrowser=chrome ^
+                                                 -Dexecution=grid ^
+                                                 -DgridUrl=%GRID_URL% ^
+                                                 -Dallure.results.directory=allure-results
+                                              '''
+                                      }
+                               }
 
 
                             // =================================================
@@ -235,13 +235,13 @@ pipeline {
                                         echo.
 
                                         mvn clean test ^
-                                            -Dbrowser=firefox ^
-                                            -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL% ^
-                                            -Dallure.results.directory=allure-results
-                                    '''
+                                                -Dbrowser=firefox ^
+                                                -Dexecution=grid ^
+                                                -DgridUrl=%GRID_URL% ^
+                                                -Dallure.results.directory=allure-results
+                                            '''
+                                        }
                                 }
-                            }
 
 
                             // =================================================
@@ -330,13 +330,13 @@ pipeline {
                                         echo.
 
                                         mvn clean test ^
-                                            -Dbrowser=edge ^
-                                            -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL% ^
-                                            -Dallure.results.directory=allure-results
-                                    '''
+                                                -Dbrowser=edge ^
+                                                -Dexecution=grid ^
+                                                 -DgridUrl=%GRID_URL% ^
+                                                 -Dallure.results.directory=allure-results
+                                              '''
+                                        }
                                 }
-                            }
 
 
                             // =================================================

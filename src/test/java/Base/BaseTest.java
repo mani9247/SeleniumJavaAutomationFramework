@@ -15,16 +15,16 @@ public class BaseTest {
 
     public void setup(String browser) {
 
-        String gridUrl = System.getProperty(
-                "gridUrl",
-                "http://localhost:4444"
-        );
-
         try {
 
+            String gridUrl = System.getProperty(
+                    "gridUrl",
+                    "http://localhost:4444"
+            );
+
             System.out.println("==============================================");
-            System.out.println("Starting browser: " + browser);
-            System.out.println("Grid URL: " + gridUrl);
+            System.out.println("Browser  : " + browser);
+            System.out.println("Grid URL : " + gridUrl);
             System.out.println("==============================================");
 
             if (browser.equalsIgnoreCase("chrome")) {
@@ -75,14 +75,17 @@ public class BaseTest {
                 );
             }
 
-            System.out.println("Browser started successfully: " + browser);
+            System.out.println(
+                    "Driver created successfully for: " + browser
+            );
 
             driver.manage().window().maximize();
 
         } catch (MalformedURLException e) {
 
             throw new RuntimeException(
-                    "Invalid Grid URL: " + gridUrl,
+                    "Invalid Grid URL: " +
+                            System.getProperty("gridUrl"),
                     e
             );
 
@@ -92,7 +95,10 @@ public class BaseTest {
                     "Failed to initialize driver for browser: "
                             + browser
                             + " | Grid URL: "
-                            + gridUrl
+                            + System.getProperty(
+                            "gridUrl",
+                            "http://localhost:4444"
+                    )
                             + " | Error: "
                             + e.getMessage(),
                     e
@@ -103,8 +109,6 @@ public class BaseTest {
     public void tearDown() {
 
         if (driver != null) {
-
-            System.out.println("Closing browser...");
 
             driver.quit();
             driver = null;
