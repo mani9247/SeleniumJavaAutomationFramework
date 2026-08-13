@@ -10,8 +10,8 @@ pipeline {
 
     environment {
 
-        // Selenium Grid URL
-        GRID_URL = 'http://localhost:4444/wd/hub'
+        // Selenium Grid 4 URL
+        GRID_URL = 'http://localhost:4444'
 
         EXECUTION = 'grid'
 
@@ -47,6 +47,10 @@ pipeline {
 
                     echo Docker Version:
                     docker --version
+                    echo.
+
+                    echo Selenium Grid URL:
+                    echo %GRID_URL%
                     echo.
 
                     echo Selenium Grid Status:
@@ -94,7 +98,6 @@ pipeline {
 
             parallel {
 
-
                 // ====================================================
                 // CHROME
                 // ====================================================
@@ -139,10 +142,9 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=chrome ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL%/wd/hub
+                                            -DgridUrl=%GRID_URL% ^
                                             -Dallure.results.directory=allure-results
                                     '''
-
                                 }
                             }
 
@@ -160,6 +162,7 @@ pipeline {
                                 bat '''
                                     echo.
                                     echo Surefire reports:
+
                                     if exist target\\surefire-reports (
                                         dir target\\surefire-reports
                                     ) else (
@@ -168,6 +171,7 @@ pipeline {
 
                                     echo.
                                     echo Allure results:
+
                                     if exist allure-results (
                                         dir allure-results
                                     ) else (
@@ -233,10 +237,9 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=firefox ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL%/wd/hub
+                                            -DgridUrl=%GRID_URL% ^
                                             -Dallure.results.directory=allure-results
                                     '''
-
                                 }
                             }
 
@@ -254,6 +257,7 @@ pipeline {
                                 bat '''
                                     echo.
                                     echo Surefire reports:
+
                                     if exist target\\surefire-reports (
                                         dir target\\surefire-reports
                                     ) else (
@@ -262,6 +266,7 @@ pipeline {
 
                                     echo.
                                     echo Allure results:
+
                                     if exist allure-results (
                                         dir allure-results
                                     ) else (
@@ -327,10 +332,9 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=edge ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL%/wd/hub
+                                            -DgridUrl=%GRID_URL% ^
                                             -Dallure.results.directory=allure-results
                                     '''
-
                                 }
                             }
 
@@ -348,6 +352,7 @@ pipeline {
                                 bat '''
                                     echo.
                                     echo Surefire reports:
+
                                     if exist target\\surefire-reports (
                                         dir target\\surefire-reports
                                     ) else (
@@ -356,6 +361,7 @@ pipeline {
 
                                     echo.
                                     echo Allure results:
+
                                     if exist allure-results (
                                         dir allure-results
                                     ) else (
@@ -501,7 +507,7 @@ pipeline {
 
 
         // ============================================================
-        // 6. PUBLISH JUNIT
+        // 6. PUBLISH JUNIT REPORTS
         // ============================================================
 
         stage('Publish JUnit Reports') {
@@ -701,3 +707,4 @@ pipeline {
         }
     }
 }
+
