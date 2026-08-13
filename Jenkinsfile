@@ -9,88 +9,96 @@ pipeline {
     }
 
     environment {
+
+        // Selenium Grid URL
         GRID_URL = 'http://localhost:4444/wd/hub'
+
         EXECUTION = 'grid'
+
         MAVEN_OPTS = '-Xmx2048m'
     }
 
     stages {
 
         // ============================================================
-        // 1. CHECK ENVIRONMENT
+        // 1. ENVIRONMENT CHECK
         // ============================================================
+
         stage('Environment Check') {
+
             steps {
-                script {
 
-                    echo "=============================================="
-                    echo "        ENVIRONMENT CHECK"
-                    echo "=============================================="
+                echo "=============================================="
+                echo "        ENVIRONMENT CHECK"
+                echo "=============================================="
 
-                    bat '''
-                        echo Jenkins Workspace:
-                        echo %WORKSPACE%
-                        echo.
+                bat '''
+                    echo Jenkins Workspace:
+                    echo %WORKSPACE%
+                    echo.
 
-                        echo Java Version:
-                        java -version
-                        echo.
+                    echo Java Version:
+                    java -version
+                    echo.
 
-                        echo Maven Version:
-                        mvn -version
-                        echo.
+                    echo Maven Version:
+                    mvn -version
+                    echo.
 
-                        echo Docker Version:
-                        docker --version
-                        echo.
+                    echo Docker Version:
+                    docker --version
+                    echo.
 
-                        echo Checking Selenium Grid:
-                        curl -s http://localhost:4444/status
-                        echo.
-                    '''
-                }
+                    echo Selenium Grid Status:
+                    curl -s http://localhost:4444/status
+                    echo.
+                '''
             }
         }
 
 
         // ============================================================
-        // 2. CHECKOUT CODE
+        // 2. CHECKOUT
         // ============================================================
+
         stage('Checkout') {
+
             steps {
-                script {
 
-                    deleteDir()
+                deleteDir()
 
-                    checkout scm
+                checkout scm
 
-                    echo "=============================================="
-                    echo "        SOURCE CODE CHECKOUT COMPLETE"
-                    echo "=============================================="
+                echo "=============================================="
+                echo "        SOURCE CODE CHECKOUT COMPLETE"
+                echo "=============================================="
 
-                    bat '''
-                        echo Current directory:
-                        cd
-                        echo.
+                bat '''
+                    echo Current directory:
+                    cd
 
-                        echo Project files:
-                        dir
-                    '''
-                }
+                    echo.
+
+                    echo Project files:
+                    dir
+                '''
             }
         }
 
 
         // ============================================================
-        // 3. RUN TESTS IN PARALLEL
+        // 3. RUN ALL BROWSERS IN PARALLEL
         // ============================================================
+
         stage('Run Tests - All Browsers') {
 
             parallel {
 
+
                 // ====================================================
                 // CHROME
                 // ====================================================
+
                 stage('Chrome Tests') {
 
                     steps {
@@ -113,29 +121,59 @@ pipeline {
                                     echo "=============================================="
 
                                     bat '''
-                                        echo Browser      : chrome
-                                        echo Execution    : %EXECUTION%
-                                        echo Grid URL     : %GRID_URL%
-                                        echo Workspace    : %CD%
+                                        echo Browser   : chrome
+                                        echo Grid URL  : %GRID_URL%
+                                        echo Workspace : %CD%
+                                        echo.
+
+                                        if exist allure-results (
+                                            rmdir /S /Q allure-results
+                                        )
+
+                                        mkdir allure-results
+
+                                        echo.
+                                        echo Running Chrome tests...
                                         echo.
 
                                         mvn clean test ^
                                             -Dbrowser=chrome ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL%
+                                            -DgridUrl=%GRID_URL% ^
+                                            -Dallure.results.directory=allure-results
                                     '''
+
                                 }
                             }
 
-                            // ----------------------------------------
+
+                            // =================================================
                             // STASH CHROME RESULTS
-                            // Always attempt this even if Maven fails
-                            // ----------------------------------------
+                            // =================================================
+
                             dir('chrome-workspace') {
 
                                 echo "=============================================="
-                                echo "        COLLECTING CHROME RESULTS"
+                                echo "        CHROME RESULT FILES"
                                 echo "=============================================="
+
+                                bat '''
+                                    echo.
+                                    echo Surefire reports:
+                                    if exist target\\surefire-reports (
+                                        dir target\\surefire-reports
+                                    ) else (
+                                        echo No Surefire reports found
+                                    )
+
+                                    echo.
+                                    echo Allure results:
+                                    if exist allure-results (
+                                        dir allure-results
+                                    ) else (
+                                        echo No Allure results found
+                                    )
+                                '''
 
                                 stash(
                                         name: 'results-chrome',
@@ -146,7 +184,7 @@ pipeline {
                                         allowEmpty: true
                                 )
 
-                                echo "Chrome results stashed successfully."
+                                echo "Chrome results stashed."
                             }
                         }
                     }
@@ -156,6 +194,7 @@ pipeline {
                 // ====================================================
                 // FIREFOX
                 // ====================================================
+
                 stage('Firefox Tests') {
 
                     steps {
@@ -178,28 +217,59 @@ pipeline {
                                     echo "=============================================="
 
                                     bat '''
-                                        echo Browser      : firefox
-                                        echo Execution    : %EXECUTION%
-                                        echo Grid URL     : %GRID_URL%
-                                        echo Workspace    : %CD%
+                                        echo Browser   : firefox
+                                        echo Grid URL  : %GRID_URL%
+                                        echo Workspace : %CD%
+                                        echo.
+
+                                        if exist allure-results (
+                                            rmdir /S /Q allure-results
+                                        )
+
+                                        mkdir allure-results
+
+                                        echo.
+                                        echo Running Firefox tests...
                                         echo.
 
                                         mvn clean test ^
                                             -Dbrowser=firefox ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL%
+                                            -DgridUrl=%GRID_URL% ^
+                                            -Dallure.results.directory=allure-results
                                     '''
+
                                 }
                             }
 
-                            // ----------------------------------------
+
+                            // =================================================
                             // STASH FIREFOX RESULTS
-                            // ----------------------------------------
+                            // =================================================
+
                             dir('firefox-workspace') {
 
                                 echo "=============================================="
-                                echo "        COLLECTING FIREFOX RESULTS"
+                                echo "        FIREFOX RESULT FILES"
                                 echo "=============================================="
+
+                                bat '''
+                                    echo.
+                                    echo Surefire reports:
+                                    if exist target\\surefire-reports (
+                                        dir target\\surefire-reports
+                                    ) else (
+                                        echo No Surefire reports found
+                                    )
+
+                                    echo.
+                                    echo Allure results:
+                                    if exist allure-results (
+                                        dir allure-results
+                                    ) else (
+                                        echo No Allure results found
+                                    )
+                                '''
 
                                 stash(
                                         name: 'results-firefox',
@@ -210,7 +280,7 @@ pipeline {
                                         allowEmpty: true
                                 )
 
-                                echo "Firefox results stashed successfully."
+                                echo "Firefox results stashed."
                             }
                         }
                     }
@@ -220,6 +290,7 @@ pipeline {
                 // ====================================================
                 // EDGE
                 // ====================================================
+
                 stage('Edge Tests') {
 
                     steps {
@@ -242,28 +313,59 @@ pipeline {
                                     echo "=============================================="
 
                                     bat '''
-                                        echo Browser      : edge
-                                        echo Execution    : %EXECUTION%
-                                        echo Grid URL     : %GRID_URL%
-                                        echo Workspace    : %CD%
+                                        echo Browser   : edge
+                                        echo Grid URL  : %GRID_URL%
+                                        echo Workspace : %CD%
+                                        echo.
+
+                                        if exist allure-results (
+                                            rmdir /S /Q allure-results
+                                        )
+
+                                        mkdir allure-results
+
+                                        echo.
+                                        echo Running Edge tests...
                                         echo.
 
                                         mvn clean test ^
                                             -Dbrowser=edge ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL%
+                                            -DgridUrl=%GRID_URL% ^
+                                            -Dallure.results.directory=allure-results
                                     '''
+
                                 }
                             }
 
-                            // ----------------------------------------
+
+                            // =================================================
                             // STASH EDGE RESULTS
-                            // ----------------------------------------
+                            // =================================================
+
                             dir('edge-workspace') {
 
                                 echo "=============================================="
-                                echo "        COLLECTING EDGE RESULTS"
+                                echo "        EDGE RESULT FILES"
                                 echo "=============================================="
+
+                                bat '''
+                                    echo.
+                                    echo Surefire reports:
+                                    if exist target\\surefire-reports (
+                                        dir target\\surefire-reports
+                                    ) else (
+                                        echo No Surefire reports found
+                                    )
+
+                                    echo.
+                                    echo Allure results:
+                                    if exist allure-results (
+                                        dir allure-results
+                                    ) else (
+                                        echo No Allure results found
+                                    )
+                                '''
 
                                 stash(
                                         name: 'results-edge',
@@ -274,7 +376,7 @@ pipeline {
                                         allowEmpty: true
                                 )
 
-                                echo "Edge results stashed successfully."
+                                echo "Edge results stashed."
                             }
                         }
                     }
@@ -284,8 +386,9 @@ pipeline {
 
 
         // ============================================================
-        // 4. COLLECT ALL BROWSER RESULTS
+        // 4. COLLECT RESULTS
         // ============================================================
+
         stage('Collect All Browser Results') {
 
             steps {
@@ -293,12 +396,11 @@ pipeline {
                 script {
 
                     echo "=============================================="
-                    echo "        COLLECTING ALL BROWSER RESULTS"
+                    echo "        COLLECTING ALL RESULTS"
                     echo "=============================================="
 
-                    // --------------------------------------------
-                    // CHROME
-                    // --------------------------------------------
+
+                    // Chrome
                     dir('results/chrome') {
 
                         deleteDir()
@@ -309,9 +411,7 @@ pipeline {
                     }
 
 
-                    // --------------------------------------------
-                    // FIREFOX
-                    // --------------------------------------------
+                    // Firefox
                     dir('results/firefox') {
 
                         deleteDir()
@@ -322,9 +422,7 @@ pipeline {
                     }
 
 
-                    // --------------------------------------------
-                    // EDGE
-                    // --------------------------------------------
+                    // Edge
                     dir('results/edge') {
 
                         deleteDir()
@@ -336,7 +434,7 @@ pipeline {
 
 
                     echo "=============================================="
-                    echo "        ALL RESULTS COLLECTED"
+                    echo "        RESULTS COLLECTION COMPLETE"
                     echo "=============================================="
                 }
             }
@@ -346,145 +444,150 @@ pipeline {
         // ============================================================
         // 5. VERIFY RESULTS
         // ============================================================
+
         stage('Verify Collected Results') {
 
             steps {
 
-                script {
+                echo "=============================================="
+                echo "        VERIFYING RESULTS"
+                echo "=============================================="
 
-                    echo "=============================================="
-                    echo "        VERIFYING COLLECTED RESULTS"
-                    echo "=============================================="
+                bat '''
+                    echo.
+                    echo ================= CHROME =================
 
-                    bat '''
-                        echo.
-                        echo ================= CHROME =================
-                        if exist results\\chrome\\target\\surefire-reports (
-                            dir results\\chrome\\target\\surefire-reports
-                        ) else (
-                            echo Chrome JUnit reports not found
-                        )
+                    if exist results\\chrome\\allure-results (
+                        echo Chrome Allure results FOUND
+                        dir results\\chrome\\allure-results
+                    ) else (
+                        echo Chrome Allure results NOT FOUND
+                    )
 
-                        echo.
-                        echo ================= FIREFOX =================
-                        if exist results\\firefox\\target\\surefire-reports (
-                            dir results\\firefox\\target\\surefire-reports
-                        ) else (
-                            echo Firefox JUnit reports not found
-                        )
 
-                        echo.
-                        echo ================= EDGE =================
-                        if exist results\\edge\\target\\surefire-reports (
-                            dir results\\edge\\target\\surefire-reports
-                        ) else (
-                            echo Edge JUnit reports not found
-                        )
+                    echo.
+                    echo ================= FIREFOX =================
 
-                        echo.
-                        echo ================= ALLURE =================
+                    if exist results\\firefox\\allure-results (
+                        echo Firefox Allure results FOUND
+                        dir results\\firefox\\allure-results
+                    ) else (
+                        echo Firefox Allure results NOT FOUND
+                    )
 
-                        if exist results\\chrome\\allure-results (
-                            echo Chrome Allure results found
-                        ) else (
-                            echo Chrome Allure results NOT found
-                        )
 
-                        if exist results\\firefox\\allure-results (
-                            echo Firefox Allure results found
-                        ) else (
-                            echo Firefox Allure results NOT found
-                        )
+                    echo.
+                    echo ================= EDGE =================
 
-                        if exist results\\edge\\allure-results (
-                            echo Edge Allure results found
-                        ) else (
-                            echo Edge Allure results NOT found
-                        )
-                    '''
-                }
+                    if exist results\\edge\\allure-results (
+                        echo Edge Allure results FOUND
+                        dir results\\edge\\allure-results
+                    ) else (
+                        echo Edge Allure results NOT FOUND
+                    )
+
+
+                    echo.
+                    echo ================= SUREFIRE =================
+
+                    if exist results\\chrome\\target\\surefire-reports (
+                        echo Chrome Surefire reports FOUND
+                    )
+
+                    if exist results\\firefox\\target\\surefire-reports (
+                        echo Firefox Surefire reports FOUND
+                    )
+
+                    if exist results\\edge\\target\\surefire-reports (
+                        echo Edge Surefire reports FOUND
+                    )
+                '''
             }
         }
 
 
         // ============================================================
-        // 6. PUBLISH JUNIT / TESTNG RESULTS
+        // 6. PUBLISH JUNIT
         // ============================================================
-        stage('Publish Reports') {
+
+        stage('Publish JUnit Reports') {
 
             steps {
 
-                script {
+                echo "=============================================="
+                echo "        PUBLISHING JUNIT REPORTS"
+                echo "=============================================="
 
-                    echo "=============================================="
-                    echo "        PUBLISHING TEST REPORTS"
-                    echo "=============================================="
-
-                    junit(
-                            testResults: 'results/**/target/surefire-reports/junitreports/*.xml',
-                            allowEmptyResults: true,
-                            skipPublishingChecks: true
-                    )
-
-                    echo "JUnit reports published."
-                }
+                junit(
+                        testResults: 'results/**/target/surefire-reports/*.xml',
+                        allowEmptyResults: true,
+                        skipPublishingChecks: true
+                )
             }
         }
 
 
         // ============================================================
-        // 7. CREATE COMBINED ALLURE RESULTS
+        // 7. PREPARE COMBINED ALLURE RESULTS
         // ============================================================
+
         stage('Prepare Allure Results') {
 
             steps {
 
-                script {
+                echo "=============================================="
+                echo "        PREPARING ALLURE RESULTS"
+                echo "=============================================="
 
-                    echo "=============================================="
-                    echo "        PREPARING ALLURE RESULTS"
-                    echo "=============================================="
+                bat '''
+                    if exist combined-allure-results (
+                        rmdir /S /Q combined-allure-results
+                    )
 
-                    bat '''
-                        if exist combined-allure-results (
-                            rmdir /S /Q combined-allure-results
-                        )
+                    mkdir combined-allure-results
 
-                        mkdir combined-allure-results
 
-                        echo.
-                        echo Copying Chrome Allure results...
+                    echo.
+                    echo ================= CHROME =================
 
-                        if exist results\\chrome\\allure-results (
-                            xcopy /E /I /Y ^
-                                results\\chrome\\allure-results\\* ^
-                                combined-allure-results\\
-                        )
+                    if exist results\\chrome\\allure-results (
+                        xcopy /E /I /Y ^
+                            results\\chrome\\allure-results\\* ^
+                            combined-allure-results\\
+                    ) else (
+                        echo Chrome Allure results NOT FOUND
+                    )
 
-                        echo.
-                        echo Copying Firefox Allure results...
 
-                        if exist results\\firefox\\allure-results (
-                            xcopy /E /I /Y ^
-                                results\\firefox\\allure-results\\* ^
-                                combined-allure-results\\
-                        )
+                    echo.
+                    echo ================= FIREFOX =================
 
-                        echo.
-                        echo Copying Edge Allure results...
+                    if exist results\\firefox\\allure-results (
+                        xcopy /E /I /Y ^
+                            results\\firefox\\allure-results\\* ^
+                            combined-allure-results\\
+                    ) else (
+                        echo Firefox Allure results NOT FOUND
+                    )
 
-                        if exist results\\edge\\allure-results (
-                            xcopy /E /I /Y ^
-                                results\\edge\\allure-results\\* ^
-                                combined-allure-results\\
-                        )
 
-                        echo.
-                        echo Combined Allure result files:
+                    echo.
+                    echo ================= EDGE =================
 
-                        dir combined-allure-results
-                    '''
-                }
+                    if exist results\\edge\\allure-results (
+                        xcopy /E /I /Y ^
+                            results\\edge\\allure-results\\* ^
+                            combined-allure-results\\
+                    ) else (
+                        echo Edge Allure results NOT FOUND
+                    )
+
+
+                    echo.
+                    echo ================= COMBINED RESULTS =================
+
+                    dir combined-allure-results
+                '''
             }
         }
 
@@ -492,37 +595,42 @@ pipeline {
         // ============================================================
         // 8. GENERATE ALLURE REPORT
         // ============================================================
+
         stage('Generate Allure Report') {
 
             steps {
 
-                script {
+                echo "=============================================="
+                echo "        GENERATING ALLURE REPORT"
+                echo "=============================================="
 
-                    echo "=============================================="
-                    echo "        GENERATING ALLURE REPORT"
-                    echo "=============================================="
+                bat '''
+                    echo.
+                    echo Checking Allure result files...
 
-                    bat '''
-                        if exist combined-allure-results\\*.json (
-                            echo Allure result files found.
-                        ) else (
-                            echo No Allure result JSON files found.
-                        )
-                    '''
-
-                    // Jenkins Allure plugin
-                    allure(
-                            includeProperties: false,
-                            jdk: '',
-                            results: [
-                                    [
-                                            path: 'combined-allure-results'
-                                    ]
-                            ]
+                    if exist combined-allure-results\\*-result.json (
+                        echo Allure result JSON files FOUND.
+                    ) else (
+                        echo ERROR: Allure result JSON files NOT FOUND.
                     )
 
-                    echo "Allure report generated."
-                }
+                    echo.
+
+                    dir combined-allure-results
+                '''
+
+
+                allure(
+                        includeProperties: false,
+                        jdk: '',
+                        results: [
+                                [
+                                        path: 'combined-allure-results'
+                                ]
+                        ]
+                )
+
+                echo "Allure report generated."
             }
         }
     }
@@ -531,6 +639,7 @@ pipeline {
     // ================================================================
     // POST ACTIONS
     // ================================================================
+
     post {
 
         always {
@@ -541,15 +650,27 @@ pipeline {
 
             bat '''
                 echo.
-                echo Jenkins workspace:
+                echo Jenkins Workspace:
                 echo %WORKSPACE%
+
                 echo.
 
-                echo Final result directories:
+                echo Result directories:
+
                 if exist results (
                     dir results
                 ) else (
                     echo No results directory found
+                )
+
+                echo.
+
+                echo Combined Allure Results:
+
+                if exist combined-allure-results (
+                    dir combined-allure-results
+                ) else (
+                    echo No combined Allure directory found
                 )
             '''
         }
@@ -572,7 +693,7 @@ pipeline {
             echo "=============================================="
 
             echo "One or more browser test executions failed."
-            echo "Check the JUnit and Allure reports."
+            echo "Check JUnit and Allure reports."
         }
 
 
