@@ -139,7 +139,7 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=chrome ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL% ^
+                                            -DgridUrl=%GRID_URL%/wd/hub
                                             -Dallure.results.directory=allure-results
                                     '''
 
@@ -177,11 +177,9 @@ pipeline {
 
                                 stash(
                                         name: 'results-chrome',
-                                        includes: '''
-                                        target/surefire-reports/**
-                                        allure-results/**
-                                    ''',
-                                        allowEmpty: true
+                                        includes: 'target/surefire-reports/**,allure-results/**',
+                                        useDefaultExcludes: false,
+                                        allowEmpty: false
                                 )
 
                                 echo "Chrome results stashed."
@@ -235,7 +233,7 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=firefox ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL% ^
+                                            -DgridUrl=%GRID_URL%/wd/hub
                                             -Dallure.results.directory=allure-results
                                     '''
 
@@ -273,14 +271,12 @@ pipeline {
 
                                 stash(
                                         name: 'results-firefox',
-                                        includes: '''
-                                        target/surefire-reports/**
-                                        allure-results/**
-                                    ''',
-                                        allowEmpty: true
+                                        includes: 'target/surefire-reports/**,allure-results/**',
+                                        useDefaultExcludes: false,
+                                        allowEmpty: false
                                 )
 
-                                echo "Firefox results stashed."
+                                echo "Firefox results stashed successfully."
                             }
                         }
                     }
@@ -331,7 +327,7 @@ pipeline {
                                         mvn clean test ^
                                             -Dbrowser=edge ^
                                             -Dexecution=grid ^
-                                            -DgridUrl=%GRID_URL% ^
+                                            -DgridUrl=%GRID_URL%/wd/hub
                                             -Dallure.results.directory=allure-results
                                     '''
 
@@ -369,14 +365,12 @@ pipeline {
 
                                 stash(
                                         name: 'results-edge',
-                                        includes: '''
-                                        target/surefire-reports/**
-                                        allure-results/**
-                                    ''',
-                                        allowEmpty: true
+                                        includes: 'target/surefire-reports/**,allure-results/**',
+                                        useDefaultExcludes: false,
+                                        allowEmpty: false
                                 )
 
-                                echo "Edge results stashed."
+                                echo "Edge results stashed successfully."
                             }
                         }
                     }
