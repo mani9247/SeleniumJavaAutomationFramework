@@ -2,53 +2,38 @@ package Utilities;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+
 public class WaitUtils {
 
-        private WebDriverWait wait;
+    private WebDriver driver;
 
-        public WaitUtils(WebDriver driver){
+    private WebDriverWait wait;
 
-            ConfigReader config = new ConfigReader();
+    public WaitUtils(WebDriver driver) {
 
-            wait = new WebDriverWait(driver,
-                    Duration.ofSeconds(config.getExplicitWait()));
-        }
+        this.driver = driver;
 
-        public WebElement waitForVisibility(By locator){
-
-           return  wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(locator));
-        }
-
-    // Clickable
-    public WebElement waitForClickable(By locator){
-        return  wait.until(ExpectedConditions.elementToBeClickable(locator));
+        this.wait = new WebDriverWait(
+                driver,
+                Duration.ofSeconds(20)
+        );
     }
 
-    public WebElement waitForClickable(WebElement element){
-        return  wait.until(ExpectedConditions.elementToBeClickable(element));
+    public void waitForVisibility(By locator) {
+
+        wait.until(
+                ExpectedConditions.visibilityOfElementLocated(locator)
+        );
     }
 
-    // URL
-    public void waitForUrlContains(String partialUrl){
-        wait.until(ExpectedConditions.urlContains(partialUrl));
-    }
+    public void waitForUrlContains(String text) {
 
-    // Title
-    public void waitForTitleContains(String title){
-        wait.until(ExpectedConditions.titleContains(title));
-    }
-
-    // Alert
-    public void waitForAlert(){
-        wait.until(ExpectedConditions.alertIsPresent());
+        wait.until(
+                ExpectedConditions.urlContains(text)
+        );
     }
 }
-
-

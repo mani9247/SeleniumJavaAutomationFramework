@@ -17,28 +17,39 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 
 public class LoginTest extends BaseTest {
+
     private static final Logger logger =
             LogManager.getLogger(LoginTest.class);
 
     @DataProvider(name = "loginData", parallel = true)
     public Object[][] getData() throws IOException {
+
         ConfigReader config = new ConfigReader();
 
         return ExcelUtils.getExcelData(
                 config.getExcelPath(),
-                "LoginData");
-
+                "LoginData"
+        );
     }
+
     @Test(dataProvider = "loginData")
-    public void verifyLogin(String username,
-                            String password,
-                            String expectedResult) {
+    public void verifyLogin(
+            String username,
+            String password,
+            String expectedResult) {
+
+        System.out.println(
+                "Running test on thread: "
+                        + Thread.currentThread().getId()
+        );
 
         LoginPage login =
                 new LoginPage(DriverFactory.getDriver());
 
         login.enterUsername(username);
+
         login.enterPassword(password);
+
         login.clickLogin();
 
         if (expectedResult.equalsIgnoreCase("Pass")) {
@@ -48,7 +59,10 @@ public class LoginTest extends BaseTest {
                     "Dashboard is not displayed after successful login."
             );
 
-            System.out.println("Dashboard is displayed.");
+            logger.info(
+                    "Dashboard displayed successfully for username: {}",
+                    username
+            );
 
         } else {
 
@@ -56,13 +70,15 @@ public class LoginTest extends BaseTest {
                     login.isErrorMessageDisplayed(),
                     "Error message is not displayed for invalid login."
             );
+
+            logger.info(
+                    "Invalid login handled correctly for username: {}",
+                    username
+            );
         }
 
-        System.out.println("--------------------------------");
+        logger.info("--------------------------------");
         logger.info("Username : {}", username);
-        logger.info("Password : {}", password);
-        System.out.println("Expected : " + expectedResult);
+        logger.info("Expected : {}", expectedResult);
     }
-
-    }
-
+}

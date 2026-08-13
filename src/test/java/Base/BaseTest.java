@@ -5,6 +5,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,7 +15,10 @@ public class BaseTest {
 
     protected WebDriver driver;
 
-    public void setup(String browser) {
+    @BeforeMethod(alwaysRun = true)
+    public void setUp() {
+
+        String browser = System.getProperty("browser", "chrome");
 
         try {
 
@@ -22,10 +27,11 @@ public class BaseTest {
                     "http://localhost:4444"
             );
 
-            System.out.println("==============================================");
+            System.out.println("======================================");
             System.out.println("Browser  : " + browser);
             System.out.println("Grid URL : " + gridUrl);
-            System.out.println("==============================================");
+            System.out.println("Thread   : " + Thread.currentThread().getId());
+            System.out.println("======================================");
 
             if (browser.equalsIgnoreCase("chrome")) {
 
@@ -75,11 +81,15 @@ public class BaseTest {
                 );
             }
 
+            // IMPORTANT:
+            // Put the created driver into DriverFactory
+            DriverFactory.setDriver(driver);
+
+            driver.manage().window().maximize();
+
             System.out.println(
                     "Driver created successfully for: " + browser
             );
-
-            driver.manage().window().maximize();
 
         } catch (MalformedURLException e) {
 
@@ -106,12 +116,16 @@ public class BaseTest {
         }
     }
 
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
 
-        if (driver != null) {
+        System.out.println(
+                "Closing driver. Thread: "
+                        + Thread.currentThread().getId()
+        );
 
-            driver.quit();
-            driver = null;
-        }
+        DriverFactory.unload();
+
+        driver = null;
     }
 }

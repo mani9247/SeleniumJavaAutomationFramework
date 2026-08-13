@@ -1,72 +1,54 @@
 package Utilities;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class ElementActions {
 
-        private WebDriver driver;
-        private WaitUtils wait;
+    private WebDriver driver;
 
-    private static final Logger logger =
-            LogManager.getLogger(ElementActions.class);
+    private WaitUtils wait;
 
-        public ElementActions(WebDriver driver){
+    public ElementActions(WebDriver driver) {
 
-            this.driver = driver;
-            this.wait = new WaitUtils(driver);
-        }
+        this.driver = driver;
 
-        public void type(By locator, String text){
+        this.wait = new WaitUtils(driver);
+    }
 
-            WebElement element = wait.waitForVisibility(locator);
+    public void type(By locator, String text) {
 
-            element.clear();
+        wait.waitForVisibility(locator);
 
-            element.sendKeys(text);
-            logger.info("Entered text '{}' into {}", text, locator);
-        }
+        WebElement element =
+                driver.findElement(locator);
 
-        public void click(By locator){
+        element.clear();
 
-            int attempts = 0;
+        element.sendKeys(text);
+    }
 
-            while (attempts < 3) {
-                try {
-                    wait.waitForClickable(locator).click();
-                    logger.info("Clicked on {}", locator);
-                    return;
-                } catch (StaleElementReferenceException e) {
-                    attempts++;
-                    logger.warn("Stale element detected. Retry {}", attempts);
-                }
-            }
+    public void click(By locator) {
 
-            throw new RuntimeException("Unable to click: " + locator);
-        }
+        wait.waitForVisibility(locator);
 
-        public String getText(By locator){
+        driver.findElement(locator).click();
+    }
 
-            String text = wait.waitForVisibility(locator).getText();
+    public boolean isDisplayed(By locator) {
 
-            logger.info("Fetched text '{}' from {}", text, locator);
+        try {
 
-            return text;
+            wait.waitForVisibility(locator);
 
-        }
+            return driver
+                    .findElement(locator)
+                    .isDisplayed();
 
-        public boolean isDisplayed(By locator){
+        } catch (Exception e) {
 
-            boolean status =
-                    wait.waitForVisibility(locator).isDisplayed();
-
-            logger.info("{} Displayed : {}", locator, status);
-
-            return status;
+            return false;
         }
     }
+}
