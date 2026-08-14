@@ -7,6 +7,27 @@ pipeline {
         skipDefaultCheckout(true)
         disableConcurrentBuilds()
     }
+    parameters {
+
+        choice(
+                name: 'BROWSER',
+                choices: [
+                        'chrome',
+                        'firefox',
+                        'edge',
+                        'all'
+                ],
+                description: 'Select browser for automation execution'
+        )
+
+        choice(
+                name: 'EXECUTION',
+                choices: [
+                        'grid'
+                ],
+                description: 'Execution environment'
+        )
+    }
 
     environment {
 
@@ -105,6 +126,12 @@ pipeline {
                 // ====================================================
 
                 stage('Chrome Tests') {
+                    when {
+                        expression {
+                            params.BROWSER == 'chrome' ||
+                                    params.BROWSER == 'all'
+                        }
+                    }
 
                     steps {
 
@@ -143,7 +170,7 @@ pipeline {
 
                                         mvn clean test ^
                                                         -Dbrowser=chrome ^
-                                                        -Dexecution=grid ^
+                                                        -Dexecution=%EXECUTION% ^
                                                         -DgridUrl=%GRID_URL% ^
                                                         -DappUrl=%APP_URL% ^
                                                         -Dallure.results.directory=allure-results
@@ -201,6 +228,12 @@ pipeline {
                 // ====================================================
 
                 stage('Firefox Tests') {
+                    when {
+                        expression {
+                            params.BROWSER == 'firefox' ||
+                                    params.BROWSER == 'all'
+                        }
+                    }
 
                     steps {
 
@@ -239,7 +272,7 @@ pipeline {
 
                                         mvn clean test ^
                                                      -Dbrowser=firefox ^
-                                                     -Dexecution=grid ^
+                                                     -Dexecution=%EXECUTION% ^
                                                      -DgridUrl=%GRID_URL% ^
                                                      -DappUrl=%APP_URL% ^
                                                      -Dallure.results.directory=allure-results
@@ -297,6 +330,12 @@ pipeline {
                 // ====================================================
 
                 stage('Edge Tests') {
+                    when {
+                        expression {
+                            params.BROWSER == 'edge' ||
+                                    params.BROWSER == 'all'
+                        }
+                    }
 
                     steps {
 
@@ -335,7 +374,7 @@ pipeline {
 
                                         mvn clean test ^
                                                     -Dbrowser=edge ^
-                                                    -Dexecution=grid ^
+                                                    -Dexecution=%EXECUTION% ^
                                                     -DgridUrl=%GRID_URL% ^
                                                     -DappUrl=%APP_URL% ^
                                                     -Dallure.results.directory=allure-results
@@ -406,35 +445,45 @@ pipeline {
 
 
                     // Chrome
-                    dir('results/chrome') {
+                    if (params.BROWSER == 'chrome' ||
+                            params.BROWSER == 'all') {
+                        dir('results/chrome') {
 
-                        deleteDir()
+                            deleteDir()
 
-                        echo "Collecting Chrome results..."
+                            echo "Collecting Chrome results..."
 
-                        unstash 'results-chrome'
+                            unstash 'results-chrome'
+                        }
                     }
 
 
                     // Firefox
-                    dir('results/firefox') {
+                    if (params.BROWSER == 'firefox' ||
+                            params.BROWSER == 'all') {
+                        dir('results/firefox') {
 
-                        deleteDir()
+                            deleteDir()
 
-                        echo "Collecting Firefox results..."
+                            echo "Collecting Firefox results..."
 
-                        unstash 'results-firefox'
+                            unstash 'results-firefox'
+                        }
                     }
 
 
                     // Edge
-                    dir('results/edge') {
 
-                        deleteDir()
+                    if (params.BROWSER == 'edge' ||
+                            params.BROWSER == 'all') {
+                        dir('results/edge') {
 
-                        echo "Collecting Edge results..."
+                            deleteDir()
 
-                        unstash 'results-edge'
+                            echo "Collecting Edge results..."
+
+                            unstash 'results-edge'
+                        }
                     }
 
 
