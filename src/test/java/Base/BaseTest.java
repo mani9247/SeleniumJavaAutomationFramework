@@ -5,12 +5,11 @@ import Utilities.ConfigReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
-
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import org.testng.ITestResult;
@@ -61,33 +60,27 @@ public class BaseTest {
             String appUrl =
                     config.getAppUrl();
 
-            /*
-             * If browser is supplied from testng.xml,
-             * use that browser.
-             *
-             * Otherwise use browser from properties file.
-             */
+
+            // =================================================
+            // BROWSER SELECTION
+            // =================================================
+
             if (browser == null ||
                     browser.trim().isEmpty()) {
 
                 browser = browserFromConfig;
             }
 
-            System.out.println(
-                    "Browser : " + browser
-            );
+            browser = browser.trim().toLowerCase();
 
-            System.out.println(
-                    "Grid URL: " + gridUrl
-            );
 
-            System.out.println(
-                    "App URL : " + appUrl
-            );
+            System.out.println("Browser : " + browser);
+            System.out.println("Grid URL: " + gridUrl);
+            System.out.println("App URL : " + appUrl);
 
 
             // =================================================
-            // CREATE REMOTE DRIVER
+            // CREATE DRIVER
             // =================================================
 
             driver =
@@ -114,9 +107,6 @@ public class BaseTest {
 
             // =================================================
             // STORE DRIVER IN TESTNG RESULT
-            //
-            // This is important for TestListener.
-            // It prevents driver=null when taking screenshots.
             // =================================================
 
             ITestResult result =
@@ -132,12 +122,8 @@ public class BaseTest {
 
 
             // =================================================
-            // BROWSER SETTINGS
+            // TIMEOUTS
             // =================================================
-
-            driver.manage()
-                    .window()
-                    .maximize();
 
             driver.manage()
                     .timeouts()
@@ -148,8 +134,45 @@ public class BaseTest {
             driver.manage()
                     .timeouts()
                     .pageLoadTimeout(
-                            Duration.ofSeconds(60)
+                            Duration.ofSeconds(120)
                     );
+
+
+            // =================================================
+            // DO NOT USE maximize() WITH DOCKER GRID
+            // =================================================
+
+            /*
+             * IMPORTANT:
+             *
+             * Do NOT use:
+             *
+             * driver.manage().window().maximize();
+             *
+             * Edge Docker container can hang on
+             * maximizeCurrentWindow.
+             *
+             * Instead use a fixed window size.
+             */
+
+            try {
+
+                driver.manage()
+                        .window()
+                        .setSize(
+                                new Dimension(
+                                        1920,
+                                        1080
+                                )
+                        );
+
+            } catch (Exception e) {
+
+                logger.warn(
+                        "Unable to set browser window size. Continuing...",
+                        e
+                );
+            }
 
 
             // =================================================
@@ -169,18 +192,14 @@ public class BaseTest {
                             + driver.getTitle()
             );
 
-            System.out.println(
-                    "======================================"
-            );
+            System.out.println("======================================");
 
             System.out.println(
-                    "Thread  : "
+                    "Thread : "
                             + Thread.currentThread().getId()
             );
 
-            System.out.println(
-                    "======================================"
-            );
+            System.out.println("======================================");
 
 
             logger.info(
@@ -195,16 +214,29 @@ public class BaseTest {
                     e
             );
 
-            /*
-             * If driver creation failed, make sure
-             * DriverFactory does not contain stale driver.
-             */
+
+            // =================================================
+            // CLEANUP IF SETUP FAILS
+            // =================================================
+
+            try {
+
+                if (driver != null) {
+
+                    driver.quit();
+                }
+
+            } catch (Exception ignored) {
+            }
+
+
             try {
 
                 DriverFactory.removeDriver();
 
             } catch (Exception ignored) {
             }
+
 
             driver = null;
 
@@ -240,12 +272,14 @@ public class BaseTest {
             String gridUrl)
             throws MalformedURLException {
 
-        if (browser == null) {
+        if (browser == null ||
+                browser.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
-                    "Browser cannot be null."
+                    "Browser cannot be null or empty."
             );
         }
+
 
         if (gridUrl == null ||
                 gridUrl.trim().isEmpty()) {
@@ -256,11 +290,6 @@ public class BaseTest {
         }
 
 
-        browser =
-                browser.trim()
-                        .toLowerCase();
-
-
         URL url =
                 URI.create(gridUrl)
                         .toURL();
@@ -268,25 +297,53 @@ public class BaseTest {
 
         switch (browser) {
 
+            // =================================================
+            // CHROME
+            // =================================================
+
             case "chrome":
 
-                ChromeOptions chromeOptions =
-                        new ChromeOptions();
+                ChromeOptions chromeOptions = new ChromeOptions();
 
                 /*
-                 * Selenium Grid Chrome container
-                 * already runs Chrome appropriately.
+                 * Set browser size through Chrome options.
+                 * This avoids maximize() problems in Docker.
                  */
+
+                chromeOptions.addArguments(
+                        "--window-size=1920,1080"
+                );
+
+                chromeOptions.addArguments(
+                        "--disable-dev-shm-usage"
+                );
+
+                chromeOptions.addArguments(
+                        "--no-sandbox"
+                );
+
                 return new RemoteWebDriver(
                         url,
                         chromeOptions
                 );
 
 
+            // =================================================
+            // FIREFOX
+            // =================================================
+
             case "firefox":
 
                 FirefoxOptions firefoxOptions =
                         new FirefoxOptions();
+
+                firefoxOptions.addArguments(
+                        "--width=1920"
+                );
+
+                firefoxOptions.addArguments(
+                        "--height=1080"
+                );
 
                 return new RemoteWebDriver(
                         url,
@@ -294,16 +351,42 @@ public class BaseTest {
                 );
 
 
+            // =================================================
+            // EDGE
+            // =================================================
+
             case "edge":
 
                 EdgeOptions edgeOptions =
                         new EdgeOptions();
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Do not call maximize() for Edge Docker.
+                 */
+
+                edgeOptions.addArguments(
+                        "--window-size=1920,1080"
+                );
+
+                edgeOptions.addArguments(
+                        "--disable-dev-shm-usage"
+                );
+
+                edgeOptions.addArguments(
+                        "--no-sandbox"
+                );
 
                 return new RemoteWebDriver(
                         url,
                         edgeOptions
                 );
 
+
+            // =================================================
+            // DEFAULT
+            // =================================================
 
             default:
 
@@ -330,45 +413,43 @@ public class BaseTest {
                         + Thread.currentThread().getId()
         );
 
-        /*
-         * IMPORTANT:
-         *
-         * Do NOT remove the driver from DriverFactory
-         * before TestListener gets a chance to use it.
-         *
-         * TestListener executes based on TestNG lifecycle.
-         *
-         * We have already stored the driver inside
-         * ITestResult as well.
-         */
 
-
-        WebDriver currentDriver =
-                null;
+        WebDriver currentDriver = null;
 
 
         try {
 
-            /*
-             * First try the driver stored in TestNG result.
-             */
+            // =================================================
+            // FIRST GET DRIVER FROM TESTNG RESULT
+            // =================================================
+
             if (result != null) {
 
-                currentDriver =
-                        (WebDriver) result
-                                .getAttribute("driver");
+                Object driverObject =
+                        result.getAttribute("driver");
+
+                if (driverObject instanceof WebDriver) {
+
+                    currentDriver =
+                            (WebDriver) driverObject;
+                }
             }
 
 
-            /*
-             * If not available, get it from DriverFactory.
-             */
+            // =================================================
+            // FALLBACK TO DRIVER FACTORY
+            // =================================================
+
             if (currentDriver == null) {
 
                 currentDriver =
                         DriverFactory.getDriver();
             }
 
+
+            // =================================================
+            // QUIT DRIVER
+            // =================================================
 
             if (currentDriver != null) {
 
@@ -391,10 +472,10 @@ public class BaseTest {
 
         } finally {
 
-            /*
-             * Remove ThreadLocal driver only AFTER
-             * browser.quit().
-             */
+            // =================================================
+            // REMOVE THREADLOCAL DRIVER
+            // =================================================
+
             try {
 
                 DriverFactory.removeDriver();
@@ -406,6 +487,7 @@ public class BaseTest {
                         e
                 );
             }
+
 
             driver = null;
         }
