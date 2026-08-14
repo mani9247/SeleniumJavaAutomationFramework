@@ -83,11 +83,13 @@ public class BaseTest {
             // CREATE DRIVER
             // =================================================
 
-            driver =
-                    createDriver(
-                            browser,
-                            gridUrl
-                    );
+            System.out.println(">>> Creating RemoteWebDriver...");
+
+            driver = createDriver(browser, gridUrl);
+
+            System.out.println(">>> RemoteWebDriver CREATED successfully");
+            System.out.println(">>> Session ID: "
+                    + ((RemoteWebDriver) driver).getSessionId());
 
 
             if (driver == null) {
@@ -103,7 +105,7 @@ public class BaseTest {
             // =================================================
 
             DriverFactory.setDriver(driver);
-
+            System.out.println(">>> Driver stored in DriverFactory");
 
             // =================================================
             // STORE DRIVER IN TESTNG RESULT
@@ -155,29 +157,17 @@ public class BaseTest {
              * Instead use a fixed window size.
              */
 
-            try {
-
-                driver.manage()
-                        .window()
-                        .setSize(
-                                new Dimension(
-                                        1920,
-                                        1080
-                                )
-                        );
-
-            } catch (Exception e) {
-
-                logger.warn(
-                        "Unable to set browser window size. Continuing...",
-                        e
-                );
-            }
 
 
             // =================================================
             // OPEN APPLICATION
             // =================================================
+            System.out.println(">>> About to open application");
+            System.out.println(">>> URL: " + appUrl);
+
+            driver.get(appUrl);
+
+            System.out.println(">>> Application opened successfully");
 
             driver.get(appUrl);
 
