@@ -13,6 +13,8 @@ pipeline {
         // Selenium Grid 4 URL
         GRID_URL = 'http://localhost:4444'
 
+        APP_URL = 'https://opensource-demo.orangehrmlive.com/'
+
         EXECUTION = 'grid'
 
         MAVEN_OPTS = '-Xmx2048m'
@@ -143,6 +145,7 @@ pipeline {
                                                         -Dbrowser=chrome ^
                                                         -Dexecution=grid ^
                                                         -DgridUrl=%GRID_URL% ^
+                                                        -DappUrl=%APP_URL% ^
                                                         -Dallure.results.directory=allure-results
                                                         '''
                                       }
@@ -238,6 +241,7 @@ pipeline {
                                                      -Dbrowser=firefox ^
                                                      -Dexecution=grid ^
                                                      -DgridUrl=%GRID_URL% ^
+                                                     -DappUrl=%APP_URL% ^
                                                      -Dallure.results.directory=allure-results
                                             '''
                                         }
@@ -333,6 +337,7 @@ pipeline {
                                                     -Dbrowser=edge ^
                                                     -Dexecution=grid ^
                                                     -DgridUrl=%GRID_URL% ^
+                                                    -DappUrl=%APP_URL% ^
                                                     -Dallure.results.directory=allure-results
                                               '''
                                         }

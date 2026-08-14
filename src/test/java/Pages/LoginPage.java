@@ -2,11 +2,11 @@ package Pages;
 
 import Base.BasePage;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 
 public class LoginPage extends BasePage {
 
@@ -14,6 +14,7 @@ public class LoginPage extends BasePage {
             LogManager.getLogger(LoginPage.class);
 
     public LoginPage(WebDriver driver) {
+
         super(driver);
     }
 
@@ -28,14 +29,17 @@ public class LoginPage extends BasePage {
 
     private By invalidCredentials =
             By.xpath(
-                    "//p[@class='oxd-text oxd-text--p oxd-alert-content-text']"
+                    "//p[contains(@class,'oxd-alert-content-text')]"
             );
 
     public void enterUsername(String user) {
 
         actions.type(txtUsername, user);
 
-        logger.info("Entering username");
+        logger.info(
+                "Entering username: {}",
+                user
+        );
     }
 
     public void enterPassword(String pwd) {
@@ -49,7 +53,7 @@ public class LoginPage extends BasePage {
 
         actions.click(btnLogin);
 
-        logger.info("Clicking Login Button");
+        logger.info("Clicking Login button");
     }
 
     public boolean isErrorMessageDisplayed() {
@@ -63,8 +67,7 @@ public class LoginPage extends BasePage {
         } catch (Exception e) {
 
             logger.error(
-                    "Error message was not displayed",
-                    e
+                    "Error message was not displayed"
             );
 
             return false;
@@ -75,7 +78,9 @@ public class LoginPage extends BasePage {
 
         try {
 
-            wait.waitForUrlContains("dashboard");
+            wait.waitForUrlContains(
+                    "dashboard"
+            );
 
             logger.info(
                     "Dashboard displayed successfully"
@@ -86,8 +91,7 @@ public class LoginPage extends BasePage {
         } catch (Exception e) {
 
             logger.error(
-                    "Dashboard is not displayed",
-                    e
+                    "Dashboard is not displayed"
             );
 
             return false;

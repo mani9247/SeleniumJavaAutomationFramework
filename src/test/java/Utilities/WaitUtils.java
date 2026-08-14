@@ -2,6 +2,8 @@ package Utilities;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -15,25 +17,46 @@ public class WaitUtils {
 
     public WaitUtils(WebDriver driver) {
 
+        if (driver == null) {
+
+            throw new IllegalArgumentException(
+                    "WebDriver cannot be null"
+            );
+        }
+
         this.driver = driver;
 
-        this.wait = new WebDriverWait(
-                driver,
-                Duration.ofSeconds(20)
+        this.wait =
+                new WebDriverWait(
+                        driver,
+                        Duration.ofSeconds(20)
+                );
+    }
+
+    public WebElement waitForVisibility(By locator) {
+
+        return wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        locator
+                )
         );
     }
 
-    public void waitForVisibility(By locator) {
+    public void waitForUrlContains(String urlText) {
 
         wait.until(
-                ExpectedConditions.visibilityOfElementLocated(locator)
+                ExpectedConditions.urlContains(
+                        urlText
+                )
         );
     }
 
-    public void waitForUrlContains(String text) {
+    public WebElement waitForElementToBeClickable(By locator) {
 
-        wait.until(
-                ExpectedConditions.urlContains(text)
+        return wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        locator
+                )
         );
     }
 }

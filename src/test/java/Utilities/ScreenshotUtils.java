@@ -14,15 +14,33 @@ public class ScreenshotUtils {
     private static final Logger logger =
             LogManager.getLogger(ScreenshotUtils.class);
 
-    public static String captureScreenshot(WebDriver driver, String testName) {
+    public static String captureScreenshot(
+            WebDriver driver,
+            String testName) {
 
         try {
 
             System.out.println("======================================");
             System.out.println("Taking Screenshot...");
             System.out.println("Driver : " + driver);
-            System.out.println("Current URL : " + driver.getCurrentUrl());
-            System.out.println("Title : " + driver.getTitle());
+
+            // IMPORTANT
+            if (driver == null) {
+
+                logger.error(
+                        "Cannot capture screenshot because WebDriver is null."
+                );
+
+                return null;
+            }
+
+            System.out.println(
+                    "Current URL : " + driver.getCurrentUrl()
+            );
+
+            System.out.println(
+                    "Title : " + driver.getTitle()
+            );
 
             byte[] screenshot =
                     ((TakesScreenshot) driver)
@@ -37,22 +55,32 @@ public class ScreenshotUtils {
                             + ".png";
 
             File file = new File(path);
-            file.getParentFile().mkdirs();
 
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(screenshot);
-            fos.close();
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
 
-            logger.info("Screenshot saved successfully : " + path);
+            try (FileOutputStream fos =
+                         new FileOutputStream(file)) {
+
+                fos.write(screenshot);
+            }
+
+            logger.info(
+                    "Screenshot saved successfully : {}",
+                    path
+            );
 
             return path;
 
         } catch (Exception e) {
 
-            throw new RuntimeException("Unable to capture screenshot", e);
+            logger.error(
+                    "Unable to capture screenshot",
+                    e
+            );
 
+            return null;
         }
-
     }
-
 }

@@ -12,17 +12,23 @@ public class ElementActions {
 
     public ElementActions(WebDriver driver) {
 
+        if (driver == null) {
+
+            throw new IllegalArgumentException(
+                    "WebDriver cannot be null"
+            );
+        }
+
         this.driver = driver;
 
-        this.wait = new WaitUtils(driver);
+        this.wait =
+                new WaitUtils(driver);
     }
 
     public void type(By locator, String text) {
 
-        wait.waitForVisibility(locator);
-
         WebElement element =
-                driver.findElement(locator);
+                wait.waitForVisibility(locator);
 
         element.clear();
 
@@ -31,19 +37,18 @@ public class ElementActions {
 
     public void click(By locator) {
 
-        wait.waitForVisibility(locator);
+        WebElement element =
+                wait.waitForElementToBeClickable(locator);
 
-        driver.findElement(locator).click();
+        element.click();
     }
 
     public boolean isDisplayed(By locator) {
 
         try {
 
-            wait.waitForVisibility(locator);
-
-            return driver
-                    .findElement(locator)
+            return wait
+                    .waitForVisibility(locator)
                     .isDisplayed();
 
         } catch (Exception e) {

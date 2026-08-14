@@ -3,13 +3,11 @@ package Tests;
 import Base.BaseTest;
 import Base.DriverFactory;
 import Pages.LoginPage;
-
 import Utilities.ConfigReader;
 import Utilities.ExcelUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -21,7 +19,7 @@ public class LoginTest extends BaseTest {
     private static final Logger logger =
             LogManager.getLogger(LoginTest.class);
 
-    @DataProvider(name = "loginData", parallel = true)
+    @DataProvider(name = "loginData", parallel = false)
     public Object[][] getData() throws IOException {
 
         ConfigReader config = new ConfigReader();
@@ -38,10 +36,8 @@ public class LoginTest extends BaseTest {
             String password,
             String expectedResult) {
 
-        System.out.println(
-                "Running test on thread: "
-                        + Thread.currentThread().getId()
-        );
+        logger.info("Username : {}", username);
+        logger.info("Expected : {}", expectedResult);
 
         LoginPage login =
                 new LoginPage(DriverFactory.getDriver());
@@ -60,7 +56,7 @@ public class LoginTest extends BaseTest {
             );
 
             logger.info(
-                    "Dashboard displayed successfully for username: {}",
+                    "Login successful for user: {}",
                     username
             );
 
@@ -72,13 +68,9 @@ public class LoginTest extends BaseTest {
             );
 
             logger.info(
-                    "Invalid login handled correctly for username: {}",
+                    "Invalid login correctly rejected for user: {}",
                     username
             );
         }
-
-        logger.info("--------------------------------");
-        logger.info("Username : {}", username);
-        logger.info("Expected : {}", expectedResult);
     }
 }

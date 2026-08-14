@@ -6,110 +6,84 @@ import java.util.Properties;
 
 public class ConfigReader {
 
-    private Properties prop;
-    private String env;
+    private final Properties properties;
 
     public ConfigReader() {
 
-        env = System.getProperty("env");
+        properties = new Properties();
 
-        if (env == null || env.isBlank()) {
-            env = "qa";
-        }
+        try {
 
-        String configPath =
-                "src/test/resources/" + env + ".properties";
+            FileInputStream fis =
+                    new FileInputStream(
+                            "src/test/resources/qa.properties"
+                    );
 
-        try (FileInputStream fis =
-                     new FileInputStream(configPath)) {
+            properties.load(fis);
+            fis.close();
 
-            prop = new Properties();
-            prop.load(fis);
-
-            System.out.println(
-                    "Loaded configuration : " + env + ".properties");
+            System.out.println("Loaded configuration : qa.properties");
 
         } catch (IOException e) {
 
             throw new RuntimeException(
-                    "Unable to load configuration file: "
-                            + configPath, e);
+                    "Failed to load qa.properties",
+                    e
+            );
         }
     }
 
+    // Browser
     public String getBrowser() {
-        return prop.getProperty("browser");
+
+        return properties.getProperty("browser");
     }
 
-    public String getUrl() {
-        return prop.getProperty("url");
+    // Execution mode
+    public String getExecution() {
+
+        return properties.getProperty("execution");
     }
 
-    public String getUsername() {
-        return prop.getProperty("username");
+    // Selenium Grid URL
+    public String getGridUrl() {
+
+        return properties.getProperty("gridUrl");
     }
 
-    public String getPassword() {
-        return prop.getProperty("password");
+    // Application URL
+    public String getAppUrl() {
+
+        return properties.getProperty("url");
     }
 
-    public String getExcelPath() {
-
-        String path = prop.getProperty("excelPath");
-
-        if (path == null || path.isBlank()) {
-            throw new RuntimeException(
-                    "excelPath is missing in "
-                            + env + ".properties");
-        }
-
-        return path;
-    }
-
+    // Implicit wait
     public int getImplicitWait() {
 
-        String value = prop.getProperty("implicitWait");
-
-        if (value == null || value.isBlank()) {
-            throw new RuntimeException(
-                    "implicitWait is missing in "
-                            + env + ".properties");
-        }
-
-        return Integer.parseInt(value);
+        return Integer.parseInt(
+                properties.getProperty("implicitWait")
+        );
     }
 
+    // Explicit wait
     public int getExplicitWait() {
 
-        String value = prop.getProperty("explicitWait");
-
-        if (value == null || value.isBlank()) {
-            throw new RuntimeException(
-                    "explicitWait is missing in "
-                            + env + ".properties");
-        }
-
-        return Integer.parseInt(value);
+        return Integer.parseInt(
+                properties.getProperty("explicitWait")
+        );
     }
 
+    // Page load timeout
     public int getPageLoadTimeout() {
 
-        String value = prop.getProperty("pageLoadTimeout");
-
-        if (value == null || value.isBlank()) {
-            throw new RuntimeException(
-                    "pageLoadTimeout is missing in "
-                            + env + ".properties");
-        }
-
-        return Integer.parseInt(value);
+        return Integer.parseInt(
+                properties.getProperty("pageLoadTimeout")
+        );
     }
 
-    public String getExecution() {
-        return prop.getProperty("execution");
-    }
+    // Excel path
+    public String getExcelPath() {
 
-    public String getGridUrl() {
-        return prop.getProperty("gridUrl");
+        return properties.getProperty("excelPath");
     }
 }
