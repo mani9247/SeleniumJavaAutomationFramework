@@ -737,6 +737,22 @@ pipeline {
             echo "=============================================="
 
             echo "All browser tests completed successfully."
+            slackSend(
+                    channel: '#jenkins-builds',
+                    color: 'good',
+                    message: """
+✅ Jenkins Build SUCCESS
+
+Job: ${env.JOB_NAME}
+Build: #${env.BUILD_NUMBER}
+Status: ${currentBuild.currentResult}
+
+All Chrome, Firefox and Edge tests completed successfully.
+
+Build URL:
+${env.BUILD_URL}
+"""
+            )
         }
 
 
@@ -748,6 +764,25 @@ pipeline {
 
             echo "One or more browser test executions failed."
             echo "Check JUnit and Allure reports."
+
+            slackSend(
+                    channel: '#jenkins-builds',
+                    color: 'danger',
+                    message: """
+❌ Jenkins Build FAILED
+
+Job: ${env.JOB_NAME}
+Build: #${env.BUILD_NUMBER}
+Status: ${currentBuild.currentResult}
+
+One or more browser test executions failed.
+
+Please check Jenkins JUnit and Allure reports.
+
+Build URL:
+${env.BUILD_URL}
+"""
+            )
         }
 
 
@@ -758,6 +793,25 @@ pipeline {
             echo "=============================================="
 
             echo "One or more tests may have warnings or failures."
+
+            slackSend(
+                    channel: '#jenkins-builds',
+                    color: 'warning',
+                    message: """
+⚠️ Jenkins Build UNSTABLE
+
+Job: ${env.JOB_NAME}
+Build: #${env.BUILD_NUMBER}
+Status: ${currentBuild.currentResult}
+
+One or more tests may have warnings or failures.
+
+Please check Jenkins reports.
+
+Build URL:
+${env.BUILD_URL}
+"""
+            )
         }
     }
 }
