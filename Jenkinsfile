@@ -689,10 +689,9 @@ pipeline {
         }
     }
 
-
-    // ================================================================
-    // POST ACTIONS
-    // ================================================================
+// ================================================================
+// POST ACTIONS
+// ================================================================
 
     post {
 
@@ -703,32 +702,36 @@ pipeline {
             echo "=============================================="
 
             bat '''
-                echo.
-                echo Jenkins Workspace:
-                echo %WORKSPACE%
+            echo.
+            echo Jenkins Workspace:
+            echo %WORKSPACE%
 
-                echo.
+            echo.
 
-                echo Result directories:
+            echo Result directories:
 
-                if exist results (
-                    dir results
-                ) else (
-                    echo No results directory found
-                )
+            if exist results (
+                dir results
+            ) else (
+                echo No results directory found
+            )
 
-                echo.
+            echo.
 
-                echo Combined Allure Results:
+            echo Combined Allure Results:
 
-                if exist combined-allure-results (
-                    dir combined-allure-results
-                ) else (
-                    echo No combined Allure directory found
-                )
-            '''
+            if exist combined-allure-results (
+                dir combined-allure-results
+            ) else (
+                echo No combined Allure directory found
+            )
+        '''
         }
 
+
+        // ============================================================
+        // SUCCESS
+        // ============================================================
 
         success {
 
@@ -736,25 +739,38 @@ pipeline {
             echo "        BUILD SUCCESS"
             echo "=============================================="
 
-            echo "All browser tests completed successfully."
-            slackSend(
-                    channel: '#jenkins-builds',
-                    color: 'good',
-                    message: """
-✅ Jenkins Build SUCCESS
+            script {
 
-Job: ${env.JOB_NAME}
-Build: #${env.BUILD_NUMBER}
-Status: ${currentBuild.currentResult}
+                slackSend(
+                        channel: '#jenkins-builds',
+                        color: 'good',
+                        message: """
+🚀 *Automation Test Execution*
 
-All Chrome, Firefox and Edge tests completed successfully.
+✅ *BUILD SUCCESS*
 
-Build URL:
+*Job:* ${env.JOB_NAME}
+*Build:* #${env.BUILD_NUMBER}
+*Status:* ${currentBuild.currentResult}
+*Browser:* ${params.BROWSER}
+*Execution:* ${params.EXECUTION}
+
+All selected browser tests completed successfully.
+
+📊 *Allure Report:* Available in Jenkins
+📋 *JUnit Report:* Available in Jenkins
+
+🔗 *Build URL:*
 ${env.BUILD_URL}
 """
-            )
+                )
+            }
         }
 
+
+        // ============================================================
+        // FAILURE
+        // ============================================================
 
         failure {
 
@@ -762,29 +778,37 @@ ${env.BUILD_URL}
             echo "        BUILD FAILED"
             echo "=============================================="
 
-            echo "One or more browser test executions failed."
-            echo "Check JUnit and Allure reports."
+            script {
 
-            slackSend(
-                    channel: '#jenkins-builds',
-                    color: 'danger',
-                    message: """
-❌ Jenkins Build FAILED
+                slackSend(
+                        channel: '#jenkins-builds',
+                        color: 'danger',
+                        message: """
+🚨 *Automation Test Execution*
 
-Job: ${env.JOB_NAME}
-Build: #${env.BUILD_NUMBER}
-Status: ${currentBuild.currentResult}
+❌ *BUILD FAILED*
+
+*Job:* ${env.JOB_NAME}
+*Build:* #${env.BUILD_NUMBER}
+*Status:* ${currentBuild.currentResult}
+*Browser:* ${params.BROWSER}
+*Execution:* ${params.EXECUTION}
 
 One or more browser test executions failed.
 
-Please check Jenkins JUnit and Allure reports.
+Please check the Jenkins console, JUnit reports and Allure report.
 
-Build URL:
+🔗 *Build URL:*
 ${env.BUILD_URL}
 """
-            )
+                )
+            }
         }
 
+
+        // ============================================================
+        // UNSTABLE
+        // ============================================================
 
         unstable {
 
@@ -792,26 +816,67 @@ ${env.BUILD_URL}
             echo "        BUILD UNSTABLE"
             echo "=============================================="
 
-            echo "One or more tests may have warnings or failures."
+            script {
 
-            slackSend(
-                    channel: '#jenkins-builds',
-                    color: 'warning',
-                    message: """
-⚠️ Jenkins Build UNSTABLE
+                slackSend(
+                        channel: '#jenkins-builds',
+                        color: 'warning',
+                        message: """
+⚠️ *Automation Test Execution*
 
-Job: ${env.JOB_NAME}
-Build: #${env.BUILD_NUMBER}
-Status: ${currentBuild.currentResult}
+⚠️ *BUILD UNSTABLE*
+
+*Job:* ${env.JOB_NAME}
+*Build:* #${env.BUILD_NUMBER}
+*Status:* ${currentBuild.currentResult}
+*Browser:* ${params.BROWSER}
+*Execution:* ${params.EXECUTION}
 
 One or more tests may have warnings or failures.
 
-Please check Jenkins reports.
+Please check the Jenkins reports.
 
-Build URL:
+🔗 *Build URL:*
 ${env.BUILD_URL}
 """
-            )
+                )
+            }
+        }
+
+
+        // ============================================================
+        // ABORTED
+        // ============================================================
+
+        aborted {
+
+            echo "=============================================="
+            echo "        BUILD ABORTED"
+            echo "=============================================="
+
+            script {
+
+                slackSend(
+                        channel: '#jenkins-builds',
+                        color: '#808080',
+                        message: """
+🛑 *Automation Test Execution*
+
+🛑 *BUILD ABORTED*
+
+*Job:* ${env.JOB_NAME}
+*Build:* #${env.BUILD_NUMBER}
+*Status:* ${currentBuild.currentResult}
+*Browser:* ${params.BROWSER}
+*Execution:* ${params.EXECUTION}
+
+The Jenkins build was aborted before completion.
+
+🔗 *Build URL:*
+${env.BUILD_URL}
+"""
+                )
+            }
         }
     }
 }
