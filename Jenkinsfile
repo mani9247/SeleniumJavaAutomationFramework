@@ -507,8 +507,6 @@ pipeline {
                     echo "        TEST EXECUTION STATISTICS"
                     echo "=============================================="
 
-                    def browserStats = [:]
-
                     def browsers = []
 
                     if (params.BROWSER == 'chrome' || params.BROWSER == 'all') {
@@ -533,7 +531,8 @@ pipeline {
                         def resultFile =
                                 "results/${browser}/target/surefire-reports/testng-results.xml"
 
-                        echo "Reading TestNG result:"
+                        echo ""
+                        echo "Reading ${browser.toUpperCase()} TestNG results:"
                         echo resultFile
 
                         if (!fileExists(resultFile)) {
@@ -543,40 +542,34 @@ pipeline {
                             )
                         }
 
-                        def xmlContent = readFile(resultFile)
+                        def stats = powershell(
+                                returnStdout: true,
+                                script: """
+                            [xml]\$xml = Get-Content -Raw '${resultFile}'
 
-                        def testResults =
-                                new XmlSlurper().parseText(xmlContent)
+                            \$total = [int]\$xml.'testng-results'.total
+                            \$passed = [int]\$xml.'testng-results'.passed
+                            \$failed = [int]\$xml.'testng-results'.failed
+                            \$skipped = [int]\$xml.'testng-results'.skipped
 
-                        int total =
-                                testResults.@total.toString().toInteger()
+                            if (\$total -gt 0) {
+                                \$passPercentage = (\$passed * 100.0) / \$total
+                            }
+                            else {
+                                \$passPercentage = 0
+                            }
 
-                        int passed =
-                                testResults.@passed.toString().toInteger()
+                            Write-Output "\$total|\$passed|\$failed|\$skipped|\$passPercentage"
+                        """
+                        ).trim()
 
-                        int failed =
-                                testResults.@failed.toString().toInteger()
+                        def values = stats.split('\\|')
 
-                        int skipped =
-                                testResults.@skipped.toString().toInteger()
-
-                        double passPercentage =
-                                total > 0
-                                        ? (passed * 100.0) / total
-                                        : 0.0
-
-                        browserStats[browser] = [
-                                total      : total,
-                                passed     : passed,
-                                failed     : failed,
-                                skipped    : skipped,
-                                passPercent: passPercentage
-                        ]
-
-                        overallTotal += total
-                        overallPassed += passed
-                        overallFailed += failed
-                        overallSkipped += skipped
+                        int total = values[0].toInteger()
+                        int passed = values[1].toInteger()
+                        int failed = values[2].toInteger()
+                        int skipped = values[3].toInteger()
+                        double passPercentage = values[4].toDouble()
 
                         echo ""
                         echo "---------------- ${browser.toUpperCase()} ----------------"
@@ -585,12 +578,33 @@ pipeline {
                         echo "Failed      : ${failed}"
                         echo "Skipped     : ${skipped}"
                         echo "Pass %      : ${String.format('%.2f', passPercentage)}%"
+
+                        overallTotal += total
+                        overallPassed += passed
+                        overallFailed += failed
+                        overallSkipped += skipped
+
+                        def prefix = browser.toUpperCase()
+
+                        env["${prefix}_TOTAL"] = total.toString()
+                        env["${prefix}_PASSED"] = passed.toString()
+                        env["${prefix}_FAILED"] = failed.toString()
+                        env["${prefix}_SKIPPED"] = skipped.toString()
+                        env["${prefix}_PASS_PERCENTAGE"] =
+                                String.format('%.2f', passPercentage)
                     }
 
                     double overallPassPercentage =
                             overallTotal > 0
                                     ? (overallPassed * 100.0) / overallTotal
                                     : 0.0
+
+                    env.TEST_TOTAL = overallTotal.toString()
+                    env.TEST_PASSED = overallPassed.toString()
+                    env.TEST_FAILED = overallFailed.toString()
+                    env.TEST_SKIPPED = overallSkipped.toString()
+                    env.TEST_PASS_PERCENTAGE =
+                            String.format('%.2f', overallPassPercentage)
 
                     echo ""
                     echo "=============================================="
@@ -602,42 +616,6 @@ pipeline {
                     echo "Skipped     : ${overallSkipped}"
                     echo "Pass %      : ${String.format('%.2f', overallPassPercentage)}%"
                     echo "=============================================="
-
-                    // Store values for later Slack notification
-
-                    env.TEST_TOTAL = overallTotal.toString()
-                    env.TEST_PASSED = overallPassed.toString()
-                    env.TEST_FAILED = overallFailed.toString()
-                    env.TEST_SKIPPED = overallSkipped.toString()
-                    env.TEST_PASS_PERCENTAGE =
-                            String.format('%.2f', overallPassPercentage)
-
-                    // Browser-specific statistics
-
-                    browsers.each { browser ->
-
-                        def stats = browserStats[browser]
-
-                        def prefix = browser.toUpperCase()
-
-                        env["${prefix}_TOTAL"] =
-                                stats.total.toString()
-
-                        env["${prefix}_PASSED"] =
-                                stats.passed.toString()
-
-                        env["${prefix}_FAILED"] =
-                                stats.failed.toString()
-
-                        env["${prefix}_SKIPPED"] =
-                                stats.skipped.toString()
-
-                        env["${prefix}_PASS_PERCENTAGE"] =
-                                String.format(
-                                        '%.2f',
-                                        stats.passPercent
-                                )
-                    }
                 }
             }
         }
