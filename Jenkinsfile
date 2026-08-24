@@ -493,6 +493,154 @@ pipeline {
                 }
             }
         }
+        // ============================================================
+// 5. CALCULATE TEST STATISTICS
+// ============================================================
+
+        stage('Calculate Test Statistics') {
+
+            steps {
+
+                script {
+
+                    echo "=============================================="
+                    echo "        TEST EXECUTION STATISTICS"
+                    echo "=============================================="
+
+                    def browserStats = [:]
+
+                    def browsers = []
+
+                    if (params.BROWSER == 'chrome' || params.BROWSER == 'all') {
+                        browsers.add('chrome')
+                    }
+
+                    if (params.BROWSER == 'firefox' || params.BROWSER == 'all') {
+                        browsers.add('firefox')
+                    }
+
+                    if (params.BROWSER == 'edge' || params.BROWSER == 'all') {
+                        browsers.add('edge')
+                    }
+
+                    int overallTotal = 0
+                    int overallPassed = 0
+                    int overallFailed = 0
+                    int overallSkipped = 0
+
+                    browsers.each { browser ->
+
+                        def resultFile =
+                                "results/${browser}/target/surefire-reports/testng-results.xml"
+
+                        echo "Reading TestNG result:"
+                        echo resultFile
+
+                        if (!fileExists(resultFile)) {
+
+                            error(
+                                    "TestNG result file not found: ${resultFile}"
+                            )
+                        }
+
+                        def xmlContent = readFile(resultFile)
+
+                        def testResults =
+                                new XmlSlurper().parseText(xmlContent)
+
+                        int total =
+                                testResults.@total.toString().toInteger()
+
+                        int passed =
+                                testResults.@passed.toString().toInteger()
+
+                        int failed =
+                                testResults.@failed.toString().toInteger()
+
+                        int skipped =
+                                testResults.@skipped.toString().toInteger()
+
+                        double passPercentage =
+                                total > 0
+                                        ? (passed * 100.0) / total
+                                        : 0.0
+
+                        browserStats[browser] = [
+                                total      : total,
+                                passed     : passed,
+                                failed     : failed,
+                                skipped    : skipped,
+                                passPercent: passPercentage
+                        ]
+
+                        overallTotal += total
+                        overallPassed += passed
+                        overallFailed += failed
+                        overallSkipped += skipped
+
+                        echo ""
+                        echo "---------------- ${browser.toUpperCase()} ----------------"
+                        echo "Total       : ${total}"
+                        echo "Passed      : ${passed}"
+                        echo "Failed      : ${failed}"
+                        echo "Skipped     : ${skipped}"
+                        echo "Pass %      : ${String.format('%.2f', passPercentage)}%"
+                    }
+
+                    double overallPassPercentage =
+                            overallTotal > 0
+                                    ? (overallPassed * 100.0) / overallTotal
+                                    : 0.0
+
+                    echo ""
+                    echo "=============================================="
+                    echo "        OVERALL TEST STATISTICS"
+                    echo "=============================================="
+                    echo "Total       : ${overallTotal}"
+                    echo "Passed      : ${overallPassed}"
+                    echo "Failed      : ${overallFailed}"
+                    echo "Skipped     : ${overallSkipped}"
+                    echo "Pass %      : ${String.format('%.2f', overallPassPercentage)}%"
+                    echo "=============================================="
+
+                    // Store values for later Slack notification
+
+                    env.TEST_TOTAL = overallTotal.toString()
+                    env.TEST_PASSED = overallPassed.toString()
+                    env.TEST_FAILED = overallFailed.toString()
+                    env.TEST_SKIPPED = overallSkipped.toString()
+                    env.TEST_PASS_PERCENTAGE =
+                            String.format('%.2f', overallPassPercentage)
+
+                    // Browser-specific statistics
+
+                    browsers.each { browser ->
+
+                        def stats = browserStats[browser]
+
+                        def prefix = browser.toUpperCase()
+
+                        env["${prefix}_TOTAL"] =
+                                stats.total.toString()
+
+                        env["${prefix}_PASSED"] =
+                                stats.passed.toString()
+
+                        env["${prefix}_FAILED"] =
+                                stats.failed.toString()
+
+                        env["${prefix}_SKIPPED"] =
+                                stats.skipped.toString()
+
+                        env["${prefix}_PASS_PERCENTAGE"] =
+                                String.format(
+                                        '%.2f',
+                                        stats.passPercent
+                                )
+                    }
+                }
+            }
+        }
 
 
         // ============================================================
