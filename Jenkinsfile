@@ -569,7 +569,9 @@ pipeline {
                         int passed = values[1].toInteger()
                         int failed = values[2].toInteger()
                         int skipped = values[3].toInteger()
-                        double passPercentage = values[4].toDouble()
+
+                        double passPercentage =
+                                values[4].toDouble()
 
                         echo ""
                         echo "---------------- ${browser.toUpperCase()} ----------------"
@@ -583,15 +585,6 @@ pipeline {
                         overallPassed += passed
                         overallFailed += failed
                         overallSkipped += skipped
-
-                        def prefix = browser.toUpperCase()
-
-                        env["${prefix}_TOTAL"] = total.toString()
-                        env["${prefix}_PASSED"] = passed.toString()
-                        env["${prefix}_FAILED"] = failed.toString()
-                        env["${prefix}_SKIPPED"] = skipped.toString()
-                        env["${prefix}_PASS_PERCENTAGE"] =
-                                String.format('%.2f', passPercentage)
                     }
 
                     double overallPassPercentage =
@@ -599,6 +592,7 @@ pipeline {
                                     ? (overallPassed * 100.0) / overallTotal
                                     : 0.0
 
+                    // Store only fixed environment variables.
                     env.TEST_TOTAL = overallTotal.toString()
                     env.TEST_PASSED = overallPassed.toString()
                     env.TEST_FAILED = overallFailed.toString()
