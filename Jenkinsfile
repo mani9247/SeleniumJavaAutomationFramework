@@ -849,44 +849,49 @@ pipeline {
         }
 
 
-        // ============================================================
-        // SUCCESS
-        // ============================================================
-
         success {
 
             echo "=============================================="
             echo "        BUILD SUCCESS"
             echo "=============================================="
 
-            script {
+            echo "All browser tests completed successfully."
 
-                slackSend(
-                        channel: '#jenkins-builds',
-                        color: 'good',
-                        message: """
-🚀 *Automation Test Execution*
+            def testStatistics = ""
 
-✅ *BUILD SUCCESS*
+            if (fileExists('test-statistics.txt')) {
 
-*Job:* ${env.JOB_NAME}
-*Build:* #${env.BUILD_NUMBER}
-*Status:* ${currentBuild.currentResult}
-*Browser:* ${params.BROWSER}
-*Execution:* ${params.EXECUTION}
+                testStatistics = readFile(
+                        file: 'test-statistics.txt'
+                ).trim()
 
-All selected browser tests completed successfully.
+                echo "Test statistics loaded successfully."
 
-📊 *Allure Report:* Available in Jenkins
-📋 *JUnit Report:* Available in Jenkins
+            } else {
 
-🔗 *Build URL:*
+                echo "WARNING: test-statistics.txt not found."
+                testStatistics = "Test statistics file not found."
+            }
+
+            slackSend(
+                    channel: '#jenkins-builds',
+                    color: 'good',
+                    message: """
+✅ Jenkins Build SUCCESS
+
+Job: ${env.JOB_NAME}
+Build: #${env.BUILD_NUMBER}
+Status: ${currentBuild.currentResult}
+
+📊 TEST EXECUTION SUMMARY
+
+${testStatistics}
+
+🔗 Build URL:
 ${env.BUILD_URL}
 """
-                )
-            }
+            )
         }
-
 
         // ============================================================
         // FAILURE
