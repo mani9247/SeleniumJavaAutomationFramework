@@ -37,6 +37,9 @@ public class LoginTest extends BaseTest {
             String password,
             String expectedResult) {
 
+        Allure.parameter("Browser", currentBrowser);
+        Allure.parameter("Environment", "QA");
+        Allure.parameter("Execution", "Selenium Grid");
         Allure.parameter("Username", username);
         Allure.parameter("Expected Result", expectedResult);
 

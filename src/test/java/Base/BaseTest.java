@@ -4,8 +4,6 @@ import Utilities.ConfigReader;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import io.qameta.allure.Allure;
-
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -33,6 +31,7 @@ public class BaseTest {
     protected ConfigReader config;
 
     protected WebDriver driver;
+    protected String currentBrowser;
 
 
     // =========================================================
@@ -73,31 +72,14 @@ public class BaseTest {
             }
 
             browser = browser.trim().toLowerCase();
+            currentBrowser = browser;
 
 
             System.out.println("Browser : " + browser);
             System.out.println("Grid URL: " + gridUrl);
             System.out.println("App URL : " + appUrl);
 
-            // =================================================
-                      // ALLURE EXECUTION INFORMATION
-           // =================================================
 
-            Allure.parameter("Browser", browser);
-            Allure.parameter("Environment", "QA");
-            Allure.parameter("Execution", "Selenium Grid");
-            Allure.parameter("Grid URL", gridUrl);
-            Allure.parameter("Application URL", appUrl);
-
-            Allure.parameter(
-                    "Java Version",
-                    System.getProperty("java.version")
-            );
-
-            Allure.parameter(
-                    "Operating System",
-                    System.getProperty("os.name")
-            );
 
 
 
@@ -190,9 +172,6 @@ public class BaseTest {
             driver.get(appUrl);
 
             System.out.println(">>> Application opened successfully");
-
-            driver.get(appUrl);
-
 
             System.out.println(
                     "Current URL: "
