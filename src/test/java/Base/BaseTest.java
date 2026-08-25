@@ -5,6 +5,7 @@ import Utilities.ConfigReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -351,6 +352,10 @@ public class BaseTest {
                 EdgeOptions edgeOptions =
                         new EdgeOptions();
 
+                edgeOptions.setPageLoadStrategy(
+                        PageLoadStrategy.EAGER
+                );
+
                 /*
                  * IMPORTANT:
                  *
@@ -367,6 +372,21 @@ public class BaseTest {
 
                 edgeOptions.addArguments(
                         "--no-sandbox"
+                );
+                edgeOptions.addArguments(
+                        "--disable-gpu"
+                );
+
+                edgeOptions.addArguments(
+                        "--disable-software-rasterizer"
+                );
+
+                edgeOptions.addArguments(
+                        "--disable-features=RendererCodeIntegrity"
+                );
+
+                edgeOptions.addArguments(
+                        "--disable-background-networking"
                 );
 
                 return new RemoteWebDriver(
