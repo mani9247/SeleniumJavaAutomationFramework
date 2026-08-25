@@ -526,6 +526,8 @@ pipeline {
                     int overallFailed = 0
                     int overallSkipped = 0
 
+                    def statisticsText = ""
+
                     browsers.each { browser ->
 
                         def resultFile =
@@ -545,22 +547,22 @@ pipeline {
                         def stats = powershell(
                                 returnStdout: true,
                                 script: """
-                            [xml]\$xml = Get-Content -Raw '${resultFile}'
+                    [xml]\$xml = Get-Content -Raw '${resultFile}'
 
-                            \$total = [int]\$xml.'testng-results'.total
-                            \$passed = [int]\$xml.'testng-results'.passed
-                            \$failed = [int]\$xml.'testng-results'.failed
-                            \$skipped = [int]\$xml.'testng-results'.skipped
+                    \$total = [int]\$xml.'testng-results'.total
+                    \$passed = [int]\$xml.'testng-results'.passed
+                    \$failed = [int]\$xml.'testng-results'.failed
+                    \$skipped = [int]\$xml.'testng-results'.skipped
 
-                            if (\$total -gt 0) {
-                                \$passPercentage = (\$passed * 100.0) / \$total
-                            }
-                            else {
-                                \$passPercentage = 0
-                            }
+                    if (\$total -gt 0) {
+                        \$passPercentage = (\$passed * 100.0) / \$total
+                    }
+                    else {
+                        \$passPercentage = 0
+                    }
 
-                            Write-Output "\$total|\$passed|\$failed|\$skipped|\$passPercentage"
-                        """
+                    Write-Output "\$total|\$passed|\$failed|\$skipped|\$passPercentage"
+                """
                         ).trim()
 
                         def values = stats.split('\\|')
@@ -581,6 +583,10 @@ pipeline {
                         echo "Skipped     : ${skipped}"
                         echo "Pass %      : ${String.format('%.2f', passPercentage)}%"
 
+                        // Add browser statistics to text file content
+                        statisticsText +=
+                                "${browser.toUpperCase()} : Total=${total}, Passed=${passed}, Failed=${failed}, Skipped=${skipped}, Pass%=${String.format('%.2f', passPercentage)}%\n"
+
                         overallTotal += total
                         overallPassed += passed
                         overallFailed += failed
@@ -592,7 +598,7 @@ pipeline {
                                     ? (overallPassed * 100.0) / overallTotal
                                     : 0.0
 
-                    // Store only fixed environment variables.
+                    // Store environment variables
                     env.TEST_TOTAL = overallTotal.toString()
                     env.TEST_PASSED = overallPassed.toString()
                     env.TEST_FAILED = overallFailed.toString()
@@ -610,6 +616,39 @@ pipeline {
                     echo "Skipped     : ${overallSkipped}"
                     echo "Pass %      : ${String.format('%.2f', overallPassPercentage)}%"
                     echo "=============================================="
+
+                    // ========================================================
+                    // CREATE TEST STATISTICS FILE
+                    // ========================================================
+
+                    statisticsText +=
+                            "OVERALL : Total=${overallTotal}, Passed=${overallPassed}, Failed=${overallFailed}, Skipped=${overallSkipped}, Pass%=${String.format('%.2f', overallPassPercentage)}%\n"
+
+                    writeFile(
+                            file: 'test-statistics.txt',
+                            text: statisticsText
+                    )
+
+                    echo ""
+                    echo "=============================================="
+                    echo "        TEST STATISTICS FILE"
+                    echo "=============================================="
+
+                    echo "test-statistics.txt created successfully."
+
+                    bat '''
+                echo.
+                echo Checking test-statistics.txt...
+                echo.
+
+                if exist test-statistics.txt (
+                    echo TEST STATISTICS FILE FOUND
+                    echo.
+                    type test-statistics.txt
+                ) else (
+                    echo ERROR: test-statistics.txt NOT FOUND
+                )
+            '''
                 }
             }
         }
