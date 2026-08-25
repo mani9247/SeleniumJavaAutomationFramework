@@ -12,10 +12,7 @@ pipeline {
         choice(
                 name: 'BROWSER',
                 choices: [
-                        'all',
-                        'chrome',
-                        'firefox',
-                        'edge'
+                        'all'
                 ],
                 description: 'Select browser for automation execution'
         )
