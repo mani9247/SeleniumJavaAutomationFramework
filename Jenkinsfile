@@ -857,26 +857,30 @@ pipeline {
 
             echo "All browser tests completed successfully."
 
-            def testStatistics = ""
+            script {
 
-            if (fileExists('test-statistics.txt')) {
+                def testStatistics = ""
 
-                testStatistics = readFile(
-                        file: 'test-statistics.txt'
-                ).trim()
+                if (fileExists('test-statistics.txt')) {
 
-                echo "Test statistics loaded successfully."
+                    testStatistics = readFile(
+                            file: 'test-statistics.txt'
+                    ).trim()
 
-            } else {
+                    echo "Test statistics loaded successfully."
 
-                echo "WARNING: test-statistics.txt not found."
-                testStatistics = "Test statistics file not found."
-            }
+                } else {
 
-            slackSend(
-                    channel: '#jenkins-builds',
-                    color: 'good',
-                    message: """
+                    echo "WARNING: test-statistics.txt not found."
+
+                    testStatistics =
+                            "Test statistics file not found."
+                }
+
+                slackSend(
+                        channel: '#jenkins-builds',
+                        color: 'good',
+                        message: """
 ✅ Jenkins Build SUCCESS
 
 Job: ${env.JOB_NAME}
@@ -890,7 +894,8 @@ ${testStatistics}
 🔗 Build URL:
 ${env.BUILD_URL}
 """
-            )
+                )
+            }
         }
 
         // ============================================================
