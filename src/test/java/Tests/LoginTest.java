@@ -14,6 +14,10 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Description;
+
 
 public class LoginTest extends BaseTest {
 
@@ -32,6 +36,8 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(dataProvider = "loginData")
+    @Description("Verify login functionality with valid and invalid credentials")
+    @Severity(SeverityLevel.CRITICAL)
     public void verifyLogin(
             String username,
             String password,
