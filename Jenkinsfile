@@ -12,7 +12,10 @@ pipeline {
         choice(
                 name: 'BROWSER',
                 choices: [
-                        'all'
+                        'all',
+                        'chrome',
+                        'firefox',
+                        'edge'
                 ],
                 description: 'Select browser for automation execution'
         )
@@ -160,6 +163,17 @@ pipeline {
                                         )
 
                                         mkdir allure-results
+                                        
+                                              (
+                                                         echo Browser=Chrome
+                                                         echo Environment=QA
+                                                         echo Execution=Selenium Grid
+                                                         echo Grid_URL=%GRID_URL%
+                                                         echo Application_URL=%APP_URL%
+                                                         echo Jenkins_Job=%JOB_NAME%
+                                                         echo Jenkins_Build=%BUILD_NUMBER%
+                                                         echo Java_Version=%JAVA_HOME%
+                                                     ) > allure-results\\environment.properties
 
                                         echo.
                                         echo Running Chrome tests...
@@ -262,6 +276,17 @@ pipeline {
                                         )
 
                                         mkdir allure-results
+                                        
+                                        (
+                                            echo Browser=Firefox
+                                            echo Environment=QA
+                                            echo Execution=Selenium Grid
+                                            echo Grid_URL=%GRID_URL%
+                                            echo Application_URL=%APP_URL%
+                                            echo Jenkins_Job=%JOB_NAME%
+                                            echo Jenkins_Build=%BUILD_NUMBER%
+                                            echo Java_Version=%JAVA_HOME%
+                                        ) > allure-results\\environment.properties
 
                                         echo.
                                         echo Running Firefox tests...
@@ -364,6 +389,17 @@ pipeline {
                                         )
 
                                         mkdir allure-results
+                                        
+                                        (
+                                            echo Browser=Edge
+                                            echo Environment=QA
+                                            echo Execution=Selenium Grid
+                                            echo Grid_URL=%GRID_URL%
+                                            echo Application_URL=%APP_URL%
+                                            echo Jenkins_Job=%JOB_NAME%
+                                            echo Jenkins_Build=%BUILD_NUMBER%
+                                            echo Java_Version=%JAVA_HOME%
+                                        ) > allure-results\\environment.properties
 
                                         echo.
                                         echo Running Edge tests...

@@ -4,8 +4,9 @@ import Utilities.ConfigReader;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import io.qameta.allure.Allure;
 
-import org.openqa.selenium.Dimension;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -77,6 +78,27 @@ public class BaseTest {
             System.out.println("Browser : " + browser);
             System.out.println("Grid URL: " + gridUrl);
             System.out.println("App URL : " + appUrl);
+
+            // =================================================
+                      // ALLURE EXECUTION INFORMATION
+           // =================================================
+
+            Allure.parameter("Browser", browser);
+            Allure.parameter("Environment", "QA");
+            Allure.parameter("Execution", "Selenium Grid");
+            Allure.parameter("Grid URL", gridUrl);
+            Allure.parameter("Application URL", appUrl);
+
+            Allure.parameter(
+                    "Java Version",
+                    System.getProperty("java.version")
+            );
+
+            Allure.parameter(
+                    "Operating System",
+                    System.getProperty("os.name")
+            );
+
 
 
             // =================================================
@@ -154,7 +176,7 @@ public class BaseTest {
              * Edge Docker container can hang on
              * maximizeCurrentWindow.
              *
-             * Instead use a fixed window size.
+             * Instead, use a fixed window size.
              */
 
 
