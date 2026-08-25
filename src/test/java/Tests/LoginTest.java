@@ -36,18 +36,16 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(dataProvider = "loginData")
-    @Description("Verify login functionality with valid and invalid credentials")
-    @Severity(SeverityLevel.CRITICAL)
     public void verifyLogin(
             String username,
             String password,
             String expectedResult) {
 
-        Allure.parameter("Browser", currentBrowser);
-        Allure.parameter("Environment", "QA");
-        Allure.parameter("Execution", "Selenium Grid");
         Allure.parameter("Username", username);
         Allure.parameter("Expected Result", expectedResult);
+        Allure.parameter("Browser", config.getBrowser());
+        Allure.parameter("Environment", "QA");
+        Allure.parameter("Execution", "Selenium Grid");
 
         logger.info("Username : {}", username);
         logger.info("Expected : {}", expectedResult);
