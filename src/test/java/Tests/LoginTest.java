@@ -13,6 +13,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import io.qameta.allure.Allure;
 
 public class LoginTest extends BaseTest {
 
@@ -35,6 +36,9 @@ public class LoginTest extends BaseTest {
             String username,
             String password,
             String expectedResult) {
+
+        Allure.parameter("Username", username);
+        Allure.parameter("Expected Result", expectedResult);
 
         logger.info("Username : {}", username);
         logger.info("Expected : {}", expectedResult);

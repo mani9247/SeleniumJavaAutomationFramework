@@ -172,7 +172,6 @@ pipeline {
                                                          echo Application_URL=%APP_URL%
                                                          echo Jenkins_Job=%JOB_NAME%
                                                          echo Jenkins_Build=%BUILD_NUMBER%
-                                                         echo Java_Version=%JAVA_HOME%
                                                      ) > allure-results\\environment.properties
 
                                         echo.
@@ -285,7 +284,6 @@ pipeline {
                                             echo Application_URL=%APP_URL%
                                             echo Jenkins_Job=%JOB_NAME%
                                             echo Jenkins_Build=%BUILD_NUMBER%
-                                            echo Java_Version=%JAVA_HOME%
                                         ) > allure-results\\environment.properties
 
                                         echo.
@@ -398,7 +396,6 @@ pipeline {
                                             echo Application_URL=%APP_URL%
                                             echo Jenkins_Job=%JOB_NAME%
                                             echo Jenkins_Build=%BUILD_NUMBER%
-                                            echo Java_Version=%JAVA_HOME%
                                         ) > allure-results\\environment.properties
 
                                         echo.
