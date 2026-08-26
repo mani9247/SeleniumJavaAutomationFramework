@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import io.qameta.allure.Step;
 
 public class LoginPage extends BasePage {
 
@@ -32,6 +33,7 @@ public class LoginPage extends BasePage {
                     "//p[contains(@class,'oxd-alert-content-text')]"
             );
 
+    @Step("Enter username: {user}")
     public void enterUsername(String user) {
 
         actions.type(txtUsername, user);
@@ -42,6 +44,7 @@ public class LoginPage extends BasePage {
         );
     }
 
+    @Step("Enter password")
     public void enterPassword(String pwd) {
 
         actions.type(txtPassword, pwd);
@@ -49,6 +52,7 @@ public class LoginPage extends BasePage {
         logger.info("Entering password");
     }
 
+    @Step("Click Login button")
     public void clickLogin() {
 
         actions.click(btnLogin);
@@ -56,6 +60,7 @@ public class LoginPage extends BasePage {
         logger.info("Clicking Login button");
     }
 
+    @Step("Verify login error message is displayed")
     public boolean isErrorMessageDisplayed() {
 
         try {
@@ -74,6 +79,7 @@ public class LoginPage extends BasePage {
         }
     }
 
+    @Step("Verify Dashboard is displayed")
     public boolean isDashboardDisplayed() {
 
         try {

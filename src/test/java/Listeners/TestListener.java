@@ -12,6 +12,13 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import io.qameta.allure.Allure;
+
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 public class TestListener
         implements ITestListener {
@@ -164,8 +171,8 @@ public class TestListener
 
 
         // =====================================================
-        // CAPTURE SCREENSHOT
-        // =====================================================
+// CAPTURE SCREENSHOT
+// =====================================================
 
         try {
 
@@ -175,7 +182,6 @@ public class TestListener
                             result.getName()
                     );
 
-
             if (screenshotPath != null) {
 
                 logger.info(
@@ -183,14 +189,40 @@ public class TestListener
                         screenshotPath
                 );
 
-                /*
-                 * Store screenshot path inside TestNG result.
-                 * This can be used later by Extent Reports.
-                 */
+                // Store screenshot path in TestNG result
                 result.setAttribute(
                         "screenshotPath",
                         screenshotPath
                 );
+
+                // Attach screenshot to Allure
+                try {
+
+                    Path path =
+                            Paths.get(screenshotPath);
+
+                    try (InputStream inputStream =
+                                 Files.newInputStream(path)) {
+
+                        Allure.addAttachment(
+                                "Failure Screenshot",
+                                "image/png",
+                                inputStream,
+                                ".png"
+                        );
+                    }
+
+                    logger.info(
+                            "Screenshot attached to Allure successfully."
+                    );
+
+                } catch (Exception e) {
+
+                    logger.error(
+                            "Unable to attach screenshot to Allure",
+                            e
+                    );
+                }
 
             } else {
 
@@ -203,8 +235,6 @@ public class TestListener
         } catch (Exception e) {
 
             /*
-             * IMPORTANT:
-             *
              * Screenshot failure should NOT replace
              * the original test failure.
              */
@@ -215,8 +245,6 @@ public class TestListener
             );
         }
     }
-
-
     // =========================================================
     // TEST SKIPPED
     // =========================================================

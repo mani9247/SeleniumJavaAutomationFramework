@@ -6,6 +6,7 @@ import Pages.LoginPage;
 import Utilities.ConfigReader;
 import Utilities.ExcelUtils;
 
+import io.qameta.allure.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -13,10 +14,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import io.qameta.allure.Allure;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
-import io.qameta.allure.Description;
 
 
 public class LoginTest extends BaseTest {
@@ -36,16 +33,20 @@ public class LoginTest extends BaseTest {
     }
 
     @Test(dataProvider = "loginData")
+    @Description("Verify valid and invalid login functionality")
+    @Severity(SeverityLevel.CRITICAL)
+    @Feature("Login")
+    @Story("User Login Validation")
     public void verifyLogin(
             String username,
             String password,
             String expectedResult) {
 
-        Allure.parameter("Username", username);
-        Allure.parameter("Expected Result", expectedResult);
-        Allure.parameter("Browser", config.getBrowser());
+        Allure.parameter("Browser", currentBrowser);
         Allure.parameter("Environment", "QA");
         Allure.parameter("Execution", "Selenium Grid");
+        Allure.parameter("Username", username);
+        Allure.parameter("Expected Result", expectedResult);
 
         logger.info("Username : {}", username);
         logger.info("Expected : {}", expectedResult);
