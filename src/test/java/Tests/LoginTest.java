@@ -80,17 +80,6 @@ public class LoginTest extends BaseTest {
                 testResult ->
                         testResult.setName(testName)
         );
-
-        Allure.getLifecycle().updateTestCase(
-                testResult -> testResult.setParameters(
-                        testResult.getParameters()
-                                .stream()
-                                .filter(parameter ->
-                                        !parameter.getName().startsWith("arg"))
-                                .toList()
-                )
-        );
-
         Allure.parameter(
                 "Browser",
                 currentBrowser
