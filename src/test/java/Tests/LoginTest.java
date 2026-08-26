@@ -57,6 +57,30 @@ public class LoginTest extends BaseTest {
     public void verifyLogin(
             LoginData data) {
 
+        String testName;
+
+        if (data.getExpectedResult().equalsIgnoreCase("Pass")) {
+
+            testName =
+                    "Valid Login - "
+                            + data.getUsername();
+
+        } else if (data.getUsername().equalsIgnoreCase("Admin")) {
+
+            testName =
+                    "Invalid Login - Wrong Password";
+
+        } else {
+
+            testName =
+                    "Invalid Login - Wrong Username";
+        }
+
+        Allure.getLifecycle().updateTestCase(
+                testResult ->
+                        testResult.setName(testName)
+        );
+
         Allure.parameter(
                 "Browser",
                 currentBrowser
