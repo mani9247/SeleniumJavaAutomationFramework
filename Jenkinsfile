@@ -246,6 +246,9 @@ pipeline {
                     }
 
                     steps {
+                        // Stagger browser startup to reduce Grid/Docker load
+                        echo "Waiting 5 seconds before starting Firefox..."
+                        sleep time: 5, unit: 'SECONDS'
 
                         script {
 
@@ -358,6 +361,9 @@ pipeline {
                     }
 
                     steps {
+                        // Give Chrome and Firefox time to initialize first
+                        echo "Waiting 10 seconds before starting Edge..."
+                        sleep time: 10, unit: 'SECONDS'
 
                         script {
 
