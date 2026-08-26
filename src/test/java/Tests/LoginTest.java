@@ -3,6 +3,7 @@ package Tests;
 import Base.BaseTest;
 import Base.DriverFactory;
 import Pages.LoginPage;
+import TestData.LoginData;
 import Utilities.ConfigReader;
 import Utilities.ExcelUtils;
 
@@ -26,10 +27,26 @@ public class LoginTest extends BaseTest {
 
         ConfigReader config = new ConfigReader();
 
-        return ExcelUtils.getExcelData(
-                config.getExcelPath(),
-                "LoginData"
-        );
+        Object[][] excelData =
+                ExcelUtils.getExcelData(
+                        config.getExcelPath(),
+                        "LoginData"
+                );
+
+        Object[][] testData =
+                new Object[excelData.length][1];
+
+        for (int i = 0; i < excelData.length; i++) {
+
+            testData[i][0] =
+                    new LoginData(
+                            excelData[i][0].toString(),
+                            excelData[i][1].toString(),
+                            excelData[i][2].toString()
+                    );
+        }
+
+        return testData;
     }
 
     @Test(dataProvider = "loginData")
@@ -38,29 +55,60 @@ public class LoginTest extends BaseTest {
     @Feature("Login")
     @Story("User Login Validation")
     public void verifyLogin(
-            String username,
-            String password,
-            String expectedResult) {
+            LoginData data) {
 
-        Allure.parameter("Browser", currentBrowser);
-        Allure.parameter("Environment", "QA");
-        Allure.parameter("Execution", "Selenium Grid");
-        Allure.parameter("Username", username);
-        Allure.parameter("Expected Result", expectedResult);
+        Allure.parameter(
+                "Browser",
+                currentBrowser
+        );
 
-        logger.info("Username : {}", username);
-        logger.info("Expected : {}", expectedResult);
+        Allure.parameter(
+                "Environment",
+                "QA"
+        );
+
+        Allure.parameter(
+                "Execution",
+                "Selenium Grid"
+        );
+
+        Allure.parameter(
+                "Username",
+                data.getUsername()
+        );
+
+        Allure.parameter(
+                "Expected Result",
+                data.getExpectedResult()
+        );
+
+        logger.info(
+                "Username : {}",
+                data.getUsername()
+        );
+
+        logger.info(
+                "Expected : {}",
+                data.getExpectedResult()
+        );
 
         LoginPage login =
-                new LoginPage(DriverFactory.getDriver());
+                new LoginPage(
+                        DriverFactory.getDriver()
+                );
 
-        login.enterUsername(username);
+        login.enterUsername(
+                data.getUsername()
+        );
 
-        login.enterPassword(password);
+        login.enterPassword(
+                data.getPassword()
+        );
 
         login.clickLogin();
 
-        if (expectedResult.equalsIgnoreCase("Pass")) {
+        if (data.getExpectedResult()
+                .equalsIgnoreCase("Pass")) {
 
             Assert.assertTrue(
                     login.isDashboardDisplayed(),
@@ -69,7 +117,7 @@ public class LoginTest extends BaseTest {
 
             logger.info(
                     "Login successful for user: {}",
-                    username
+                    data.getUsername()
             );
 
         } else {
@@ -81,7 +129,7 @@ public class LoginTest extends BaseTest {
 
             logger.info(
                     "Invalid login correctly rejected for user: {}",
-                    username
+                    data.getUsername()
             );
         }
     }
