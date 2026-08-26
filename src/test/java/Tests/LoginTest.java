@@ -15,6 +15,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import io.qameta.allure.model.Parameter;
 
 
 public class LoginTest extends BaseTest {
@@ -104,6 +105,23 @@ public class LoginTest extends BaseTest {
                 "Expected Result",
                 data.getExpectedResult()
         );
+
+        // =========================================================
+// HIDE AUTOMATIC TESTNG DATAPROVIDER PARAMETER
+// =========================================================
+
+        Allure.getLifecycle().updateTestCase(testResult -> {
+
+            testResult.getParameters()
+                    .stream()
+                    .filter(parameter ->
+                            parameter.getName() != null &&
+                                    parameter.getName().startsWith("arg")
+                    )
+                    .forEach(parameter ->
+                            parameter.setMode(Parameter.Mode.HIDDEN)
+                    );
+        });
 
         logger.info(
                 "Username : {}",
