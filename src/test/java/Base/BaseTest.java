@@ -349,19 +349,33 @@ public class BaseTest {
 
             case "edge":
 
-                EdgeOptions edgeOptions = new EdgeOptions();
+                EdgeOptions edgeOptions =
+                        new EdgeOptions();
 
-                edgeOptions.addArguments("--window-size=1920,1080");
-                edgeOptions.addArguments("--disable-dev-shm-usage");
-                edgeOptions.addArguments("--no-sandbox");
+                // Important for Docker/Grid stability
+                edgeOptions.setPageLoadStrategy(
+                        PageLoadStrategy.EAGER
+                );
 
-                edgeOptions.addArguments("--disable-gpu");
-                edgeOptions.addArguments("--disable-software-rasterizer");
-                edgeOptions.addArguments("--disable-extensions");
-                edgeOptions.addArguments("--disable-background-networking");
-                edgeOptions.addArguments("--disable-background-timer-throttling");
-                edgeOptions.addArguments("--disable-renderer-backgrounding");
-                edgeOptions.addArguments("--disable-backgrounding-occluded-windows");
+                edgeOptions.addArguments(
+                        "--window-size=1920,1080"
+                );
+
+                edgeOptions.addArguments(
+                        "--disable-dev-shm-usage"
+                );
+
+                edgeOptions.addArguments(
+                        "--no-sandbox"
+                );
+
+                edgeOptions.addArguments(
+                        "--disable-gpu"
+                );
+
+                edgeOptions.addArguments(
+                        "--disable-extensions"
+                );
 
                 return new RemoteWebDriver(
                         url,
