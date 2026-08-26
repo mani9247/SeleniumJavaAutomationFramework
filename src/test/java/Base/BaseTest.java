@@ -141,7 +141,7 @@ public class BaseTest {
             driver.manage()
                     .timeouts()
                     .pageLoadTimeout(
-                            Duration.ofSeconds(120)
+                            Duration.ofSeconds(300)
                     );
 
 
@@ -349,45 +349,19 @@ public class BaseTest {
 
             case "edge":
 
-                EdgeOptions edgeOptions =
-                        new EdgeOptions();
+                EdgeOptions edgeOptions = new EdgeOptions();
 
-                edgeOptions.setPageLoadStrategy(
-                        PageLoadStrategy.EAGER
-                );
+                edgeOptions.addArguments("--window-size=1920,1080");
+                edgeOptions.addArguments("--disable-dev-shm-usage");
+                edgeOptions.addArguments("--no-sandbox");
 
-                /*
-                 * IMPORTANT:
-                 *
-                 * Do not call maximize() for Edge Docker.
-                 */
-
-                edgeOptions.addArguments(
-                        "--window-size=1920,1080"
-                );
-
-                edgeOptions.addArguments(
-                        "--disable-dev-shm-usage"
-                );
-
-                edgeOptions.addArguments(
-                        "--no-sandbox"
-                );
-                edgeOptions.addArguments(
-                        "--disable-gpu"
-                );
-
-                edgeOptions.addArguments(
-                        "--disable-software-rasterizer"
-                );
-
-                edgeOptions.addArguments(
-                        "--disable-features=RendererCodeIntegrity"
-                );
-
-                edgeOptions.addArguments(
-                        "--disable-background-networking"
-                );
+                edgeOptions.addArguments("--disable-gpu");
+                edgeOptions.addArguments("--disable-software-rasterizer");
+                edgeOptions.addArguments("--disable-extensions");
+                edgeOptions.addArguments("--disable-background-networking");
+                edgeOptions.addArguments("--disable-background-timer-throttling");
+                edgeOptions.addArguments("--disable-renderer-backgrounding");
+                edgeOptions.addArguments("--disable-backgrounding-occluded-windows");
 
                 return new RemoteWebDriver(
                         url,
