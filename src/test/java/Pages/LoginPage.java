@@ -2,6 +2,7 @@ package Pages;
 
 import Base.BasePage;
 
+import io.qameta.allure.Allure;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,10 +45,12 @@ public class LoginPage extends BasePage {
         );
     }
 
-    @Step("Enter password")
     public void enterPassword(String pwd) {
 
-        actions.type(txtPassword, pwd);
+        Allure.step(
+                "Enter password",
+                () -> actions.type(txtPassword, pwd)
+        );
 
         logger.info("Entering password");
     }
