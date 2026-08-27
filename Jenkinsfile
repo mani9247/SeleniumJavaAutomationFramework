@@ -783,7 +783,12 @@ pipeline {
                     )
 
                     mkdir combined-allure-results
-
+                    
+                    if exist src\\test\\resources\\categories.json (
+                         copy /Y ^
+                             src\\test\\resources\\categories.json ^
+                             combined-allure-results\\categories.json
+                    )
 
                     echo.
                     echo ================= CHROME =================
