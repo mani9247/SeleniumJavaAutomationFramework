@@ -153,7 +153,7 @@ public class LoginTest extends BaseTest {
 
             Assert.assertTrue(
                     login.isDashboardDisplayed(),
-                    "Dashboard is not displayed after successful login."
+                    "Intentional failure for Allure screenshot testing"
             );
 
             logger.info(
