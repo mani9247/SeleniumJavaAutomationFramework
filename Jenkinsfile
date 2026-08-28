@@ -161,7 +161,7 @@ pipeline {
                                         mkdir allure-results
                                         
                                               (
-                                                         echo Browser=Chrome
+                                                     
                                                          echo Environment=QA
                                                          echo Execution=Selenium Grid
                                                          echo Grid_URL=%GRID_URL%
@@ -273,7 +273,7 @@ pipeline {
                                         mkdir allure-results
                                         
                                         (
-                                            echo Browser=Firefox
+                                 
                                             echo Environment=QA
                                             echo Execution=Selenium Grid
                                             echo Grid_URL=%GRID_URL%
@@ -386,7 +386,7 @@ pipeline {
                                         mkdir allure-results
                                         
                                         (
-                                            echo Browser=Edge
+                                        
                                             echo Environment=QA
                                             echo Execution=Selenium Grid
                                             echo Grid_URL=%GRID_URL%
