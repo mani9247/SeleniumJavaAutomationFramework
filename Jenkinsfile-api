@@ -1,0 +1,89 @@
+pipeline {
+
+    agent any
+
+    parameters {
+        choice(
+            name: 'ENV',
+            choices: ['qa', 'dev', 'uat'],
+            description: 'Select API environment'
+        )
+    }
+
+    stages {
+
+        stage('Environment Check') {
+            steps {
+                echo '======================================'
+                echo '       API AUTOMATION PIPELINE'
+                echo '======================================'
+
+                bat 'java -version'
+                bat 'mvn -version'
+
+                echo "Selected Environment: ${params.ENV}"
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                deleteDir()
+                checkout scm
+            }
+        }
+
+        stage('Run API Tests') {
+            steps {
+                bat """
+                    mvn clean test ^
+                    -DsuiteXmlFile=api-testng.xml ^
+                    -Denv=${params.ENV} ^
+                    -Dallure.results.directory=allure-results
+                """
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                junit allowEmptyResults: true,
+                      testResults: 'target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Generate Allure Report') {
+            steps {
+                allure([
+                    includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'allure-results']]
+                ])
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo '======================================'
+            echo 'API AUTOMATION BUILD SUCCESS'
+            echo "Environment: ${params.ENV}"
+            echo '======================================'
+        }
+
+        failure {
+            echo '======================================'
+            echo 'API AUTOMATION BUILD FAILED'
+            echo "Environment: ${params.ENV}"
+            echo '======================================'
+        }
+
+        always {
+            archiveArtifacts(
+                artifacts: 'allure-results/**',
+                allowEmptyArchive: true
+            )
+        }
+    }
+}
